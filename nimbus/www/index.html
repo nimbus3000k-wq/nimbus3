@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Nimbus">
+<meta name="theme-color" content="#e8874a">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23feecd8'/%3E%3Cellipse cx='50' cy='58' rx='38' ry='18' fill='white'/%3E%3Cellipse cx='34' cy='44' rx='20' ry='17' fill='white'/%3E%3Cellipse cx='54' cy='40' rx='24' ry='21' fill='white'/%3E%3Cellipse cx='70' cy='46' rx='16' ry='15' fill='white'/%3E%3C/svg%3E">
+<title>Nimbus — Breakout from Burnout</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--or:#f5a96a;--orl:#fcd5b0;--orp:#feecd8;--ord:#e8874a;--orb:linear-gradient(135deg,#f5b87a,#e8874a);--lav:#d8d0f8;--lavd:#8878d0;--lavm:#baaff0;--mint:#58b088;--sky:#5898d8;--pink:#c785a9;--td:#3a2818;--tm:#8a6848;--tl:#c0a888;--cb:rgba(255,252,248,0.85);--cbr:rgba(240,200,170,0.35);--rsm:12px;--rmd:18px;--rlg:24px;--rxl:32px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',sans-serif;background:linear-gradient(150deg,#feecd8 0%,#fde8f0 30%,#ece8fc 60%,#d8f0e8 100%);min-height:100vh;color:var(--td);overflow-x:hidden;}
+.screen{display:none;min-height:100vh;flex-direction:column;}.screen.active{display:flex;}
+input[type=range]{width:100%;-webkit-appearance:none;height:6px;border-radius:3px;outline:none;background:linear-gradient(90deg,var(--or) var(--pct,50%),var(--orp) var(--pct,50%));}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:white;border:3px solid var(--or);cursor:pointer;box-shadow:0 2px 8px rgba(232,135,74,.3);}
+.sr{display:flex;align-items:center;gap:12px;}.st{flex:1;}.sv{font-size:16px;font-weight:900;color:var(--ord);min-width:26px;text-align:right;}
+.bp{width:100%;padding:16px;border-radius:var(--rlg);border:none;background:var(--orb);color:white;font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;cursor:pointer;margin-top:8px;box-shadow:0 4px 16px rgba(232,135,74,.32);transition:all .2s;}.bp:hover{transform:translateY(-1px);}
+.bs{width:100%;padding:14px;border-radius:var(--rlg);border:1.5px solid rgba(240,190,150,.4);background:transparent;color:var(--tm);font-family:'Nunito',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;}
+.fg{margin-bottom:16px;}.fl{font-size:12px;font-weight:800;color:var(--tl);letter-spacing:.6px;text-transform:uppercase;margin-bottom:8px;display:block;}
+.fi{width:100%;padding:13px 16px;border-radius:var(--rmd);border:1.5px solid rgba(240,200,160,.4);background:rgba(255,255,255,.9);font-family:'Nunito',sans-serif;font-size:15px;color:var(--td);outline:none;transition:border-color .2s;font-weight:600;}.fi:focus{border-color:var(--or);}
+.og{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.ob{padding:12px 10px;border-radius:var(--rmd);border:1.5px solid rgba(240,200,160,.35);background:rgba(255,255,255,.65);font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;color:var(--tm);cursor:pointer;transition:all .2s;text-align:center;}.ob:hover{border-color:var(--or);color:var(--ord);}.ob.sel{border-color:var(--or);background:rgba(245,169,106,.12);color:var(--ord);}
+.si{display:flex;gap:8px;justify-content:center;margin-bottom:22px;}.sd{width:8px;height:8px;border-radius:50%;background:var(--orl);transition:all .3s;}.sd.act{background:var(--or);width:24px;border-radius:4px;}.sd.dn{background:var(--mint);}
+#auth{align-items:center;justify-content:center;padding:24px;background:linear-gradient(150deg,#feecd8 0%,#fde8f0 40%,#ece8fc 100%);}
+.ac{background:rgba(255,252,248,.92);backdrop-filter:blur(16px);border:1.5px solid rgba(240,200,160,.4);border-radius:var(--rxl);padding:32px 26px;max-width:400px;width:100%;box-shadow:0 12px 48px rgba(232,135,74,.12);}
+.alo{text-align:center;margin-bottom:20px;}.at{font-size:24px;font-weight:900;color:var(--td);margin-bottom:6px;text-align:center;}.asb{font-size:14px;color:var(--tm);font-weight:600;text-align:center;margin-bottom:22px;}
+.asw{font-size:13px;color:var(--tm);text-align:center;margin-top:14px;font-weight:700;}.asw span{color:var(--ord);cursor:pointer;text-decoration:underline;}
+.ae{font-size:13px;color:#c05030;font-weight:700;text-align:center;margin-bottom:10px;display:none;}.ae.show{display:block;}
+#load{align-items:center;justify-content:center;background:linear-gradient(150deg,#feecd8 0%,#fde8f0 40%,#ece8fc 100%);}
+.lt{font-size:16px;font-weight:700;color:var(--tm);margin-top:16px;}
+#onboard{align-items:center;justify-content:center;padding:24px;background:linear-gradient(150deg,#feecd8 0%,#fde8f0 40%,#ece8fc 100%);}
+.oc{background:rgba(255,252,248,.92);backdrop-filter:blur(16px);border:1.5px solid rgba(240,200,160,.4);border-radius:var(--rxl);padding:30px 26px;max-width:420px;width:100%;box-shadow:0 12px 48px rgba(232,135,74,.12);}
+.ot{font-size:25px;font-weight:900;color:var(--td);margin-bottom:6px;line-height:1.2;}.os{font-size:14px;color:var(--tm);margin-bottom:20px;line-height:1.5;font-weight:600;}
+.cc{text-align:center;margin:8px 0 14px;}.il{display:flex;flex-direction:column;gap:6px;margin-bottom:8px;}
+.ir{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.6);border:1.5px solid rgba(240,200,160,.3);border-radius:var(--rsm);padding:8px 12px;}.irt{flex:1;font-size:13px;font-weight:700;color:var(--td);}.irs{font-size:11px;color:var(--tl);font-weight:600;margin-top:1px;}
+.irm{font-size:16px;color:var(--tl);cursor:pointer;padding:0 4px;background:none;border:none;}.irm:hover{color:#d06040;}
+.air{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.aii{flex:1 1 100%;min-width:0;padding:10px 14px;border-radius:var(--rsm);border:1.5px solid rgba(240,200,160,.35);background:rgba(255,255,255,.8);font-family:'Nunito',sans-serif;font-size:13px;color:var(--td);outline:none;font-weight:600;}.aii:focus{border-color:var(--or);}
+.aib{padding:10px 16px;border-radius:var(--rsm);border:none;background:var(--orb);color:white;font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap;flex:0 0 auto;}
+.ais{flex:1 1 auto;min-width:0;padding:10px 12px;border-radius:var(--rsm);border:1.5px solid rgba(240,200,160,.35);background:rgba(255,255,255,.8);font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;color:var(--tm);outline:none;}
+.ah{padding:52px 22px 14px;background:linear-gradient(180deg,rgba(254,236,216,.85) 0%,transparent 100%);}
+.ag{font-size:27px;font-weight:900;color:var(--td);}.ad{font-size:13px;color:var(--tm);margin-top:2px;font-weight:600;}
+.asc{flex:1;overflow-y:auto;padding:0 14px 100px;}
+.card{background:var(--cb);backdrop-filter:blur(10px);border:1.5px solid var(--cbr);border-radius:var(--rlg);padding:16px 17px;margin-bottom:10px;}
+.afc{background:linear-gradient(135deg,rgba(252,213,176,.45),rgba(216,208,248,.35));border:1.5px solid rgba(245,185,140,.28);border-radius:var(--rlg);padding:16px 18px;margin-bottom:10px;text-align:center;}
+.afq{font-size:15px;font-weight:700;color:var(--td);line-height:1.5;font-style:italic;}.afa{font-size:12px;font-weight:700;color:var(--tl);margin-top:6px;}
+.secH{font-size:11px;font-weight:800;color:var(--tl);text-transform:uppercase;letter-spacing:.8px;margin:18px 0 8px;}
+.cin{background:linear-gradient(135deg,rgba(216,208,248,.6),rgba(252,213,176,.45));border:1.5px solid rgba(186,175,240,.4);border-radius:var(--rlg);padding:16px 18px;margin-bottom:12px;text-align:center;display:none;}.cin.show{display:block;}
+.cnt{font-size:16px;font-weight:900;color:var(--lavd);margin-bottom:6px;}.cns{font-size:13px;color:var(--tm);font-weight:600;margin-bottom:12px;}
+.tc{background:var(--cb);border:1.5px solid var(--cbr);border-radius:var(--rmd);padding:13px 15px;margin-bottom:7px;display:flex;align-items:center;gap:11px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
+.tc:hover{border-color:var(--orl);}.tc.dc{background:rgba(88,176,136,.07);border-color:rgba(88,176,136,.25);opacity:.7;}.tc.dc .tt{text-decoration:line-through;color:var(--tl);}
+.tck{width:26px;height:26px;border-radius:8px;border:2px solid rgba(245,185,140,.5);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;}.tck.chk{background:var(--mint);border-color:var(--mint);}.tck.chk::after{content:'✓';color:white;font-size:13px;font-weight:900;}
+.ti{flex:1;}.tt{font-size:15px;font-weight:700;color:var(--td);}.tm2{font-size:12px;color:var(--tl);font-weight:600;margin-top:2px;}
+.pb{font-size:11px;font-weight:800;padding:4px 10px;border-radius:999px;white-space:nowrap;}.pu{background:rgba(232,135,74,.18);color:#b85020;}.pm{background:rgba(186,175,240,.25);color:#6858b0;}.pl2{background:rgba(88,176,136,.15);color:#388060;}
+.tsd{width:4px;height:100%;position:absolute;left:0;top:0;border-radius:3px 0 0 3px;}
+.bn2{position:fixed;bottom:0;left:0;right:0;background:rgba(255,252,248,.95);backdrop-filter:blur(20px);border-top:1px solid rgba(240,200,160,.3);display:flex;padding:8px 0 20px;z-index:100;}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;cursor:pointer;padding:6px 0;transition:all .2s;}.ni{font-size:22px;}.nl{font-size:10px;font-weight:700;color:var(--tl);text-transform:uppercase;letter-spacing:.3px;}.nb.act .nl{color:var(--ord);}.nb.act .ni{transform:scale(1.1);}
+#timer{background:linear-gradient(160deg,#2a1808 0%,#3a1e10 40%,#1a2018 100%);color:white;align-items:center;justify-content:center;padding:40px 24px;}
+.ttn{font-size:19px;font-weight:800;color:rgba(255,255,255,.9);margin-bottom:5px;text-align:center;}.tph{font-size:12px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:42px;}
+.tcw{position:relative;width:252px;height:252px;margin-bottom:42px;}.tsvg{width:100%;height:100%;transform:rotate(-90deg);}
+.ttr{fill:none;stroke:rgba(255,255,255,.07);stroke-width:12;}.tpr{fill:none;stroke-width:12;stroke-linecap:round;transition:stroke-dashoffset 1s linear,stroke .5s;}
+.tce{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;}.tdi{font-size:52px;font-weight:900;color:white;line-height:1;letter-spacing:-2px;}.tsu{font-size:11px;font-weight:700;color:rgba(255,255,255,.35);margin-top:4px;}
+.tct{display:flex;gap:16px;align-items:center;}.tbtn{border-radius:50%;border:none;cursor:pointer;font-size:22px;transition:all .2s;display:flex;align-items:center;justify-content:center;}
+.tbtn.pp{width:78px;height:78px;font-size:28px;background:var(--orb);color:white;box-shadow:0 0 28px rgba(232,135,74,.38);}.tbtn.pp:hover{transform:scale(1.05);}
+.tbtn.sb{width:60px;height:60px;background:rgba(255,255,255,.08);color:rgba(255,255,255,.6);}
+.bsg{margin-top:26px;background:rgba(255,255,255,.07);border-radius:var(--rlg);padding:16px 20px;text-align:center;max-width:300px;display:none;}.bsg.show{display:block;}
+.bst{font-size:14px;font-weight:800;color:rgba(255,255,255,.8);margin-bottom:6px;}.bso{display:flex;gap:10px;justify-content:center;margin-top:10px;}
+.bop{padding:8px 16px;border-radius:999px;border:1.5px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:white;font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}.bop:hover{background:rgba(255,255,255,.2);}
+#tasks,#settings,#admin,#leaderboard{padding:52px 14px 100px;overflow-y:auto;min-height:100vh;}
+.th{font-size:26px;font-weight:900;color:var(--td);margin-bottom:4px;}.ts{font-size:14px;color:var(--tm);font-weight:600;margin-bottom:16px;}
+.atb{width:100%;padding:14px;border-radius:var(--rmd);border:2px dashed rgba(245,185,140,.55);background:rgba(245,185,140,.06);color:var(--ord);font-family:'Nunito',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:13px;}.atb:hover{background:rgba(245,185,140,.12);}
+.fr{display:flex;gap:7px;margin-bottom:13px;flex-wrap:wrap;}.fc{padding:7px 14px;border-radius:999px;border:1.5px solid rgba(240,200,160,.35);background:rgba(255,255,255,.6);font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;color:var(--tm);cursor:pointer;transition:all .2s;}.fc.act{background:var(--ord);color:white;border-color:var(--ord);}
+.cgh{display:flex;align-items:center;gap:8px;margin:16px 0 8px;font-size:13px;font-weight:800;color:var(--tm);}.cgl{flex:1;height:1px;background:rgba(240,200,160,.3);}
+.ss{margin-bottom:20px;}.ssl{font-size:12px;font-weight:800;color:var(--tl);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px;}
+.srow{display:flex;align-items:center;justify-content:space-between;background:var(--cb);border:1.5px solid var(--cbr);border-radius:var(--rmd);padding:14px 16px;margin-bottom:7px;}
+.srl .srt{font-size:15px;font-weight:700;color:var(--td);}.srl .srs{font-size:12px;color:var(--tl);font-weight:600;margin-top:2px;}
+.tgl{position:relative;width:46px;height:26px;flex-shrink:0;}.tgl input{opacity:0;width:0;height:0;}
+.tgs{position:absolute;inset:0;border-radius:999px;background:rgba(200,180,160,.3);cursor:pointer;transition:.3s;}
+.tgs::before{content:'';position:absolute;width:20px;height:20px;border-radius:50%;background:white;bottom:3px;left:3px;transition:.3s;box-shadow:0 1px 4px rgba(0,0,0,.15);}
+.tgl input:checked+.tgs{background:var(--or);}.tgl input:checked+.tgs::before{transform:translateX(20px);}
+.sse{padding:8px 12px;border-radius:var(--rsm);border:1.5px solid rgba(240,200,160,.4);background:rgba(255,255,255,.8);font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;color:var(--td);outline:none;}
+.lb{width:100%;padding:14px;border-radius:var(--rmd);border:1.5px solid rgba(220,100,80,.25);background:rgba(220,100,80,.06);color:#c05030;font-family:'Nunito',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-top:4px;}
+/* ADMIN */
+.auser{background:var(--cb);border:1.5px solid var(--cbr);border-radius:var(--rlg);padding:16px;margin-bottom:12px;}
+.auser-name{font-size:17px;font-weight:900;color:var(--td);margin-bottom:3px;}.auser-seen{font-size:11px;color:var(--tl);font-weight:700;margin-bottom:10px;}
+.asec-grid{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px;}
+.asec-pill{background:rgba(245,185,140,.15);border-radius:10px;padding:7px 12px;font-size:12px;font-weight:800;color:var(--tm);text-align:center;}
+.asec-pill span{display:block;color:var(--ord);font-size:15px;font-weight:900;margin-top:2px;}
+.alog-item{font-size:12px;color:var(--tm);font-weight:600;padding:5px 0;border-bottom:1px solid rgba(240,200,160,.2);}.alog-item:last-child{border-bottom:none;}
+.arefresh{width:100%;padding:11px;border-radius:var(--rmd);border:1.5px solid rgba(245,185,140,.4);background:rgba(245,185,140,.08);color:var(--ord);font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;cursor:pointer;margin-bottom:14px;}
+/* LEADERBOARD */
+.lb-date-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.lb-date-label{font-size:12px;font-weight:800;color:var(--tl);text-transform:uppercase;letter-spacing:.7px;}
+.lb-refresh-btn{padding:7px 14px;border-radius:999px;border:1.5px solid rgba(245,185,140,.45);background:rgba(245,185,140,.1);color:var(--ord);font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;cursor:pointer;}
+.lb-card{background:var(--cb);border:1.5px solid var(--cbr);border-radius:var(--rlg);padding:14px 16px;margin-bottom:9px;display:flex;align-items:center;gap:14px;transition:all .2s;}
+.lb-card.lb-me{background:linear-gradient(135deg,rgba(245,185,140,.18),rgba(216,208,248,.12));border-color:rgba(245,185,140,.45);}
+.lb-rank{font-size:22px;font-weight:900;width:34px;text-align:center;flex-shrink:0;line-height:1;}
+.lb-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--orl),var(--lavm));display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:white;flex-shrink:0;text-shadow:0 1px 2px rgba(0,0,0,.15);}
+.lb-info{flex:1;min-width:0;}
+.lb-name{font-size:15px;font-weight:800;color:var(--td);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.lb-stats{font-size:11px;color:var(--tl);font-weight:700;margin-top:3px;display:flex;gap:8px;flex-wrap:wrap;}
+.lb-stat{display:inline-flex;align-items:center;gap:3px;}
+.lb-pts-wrap{text-align:right;flex-shrink:0;}
+.lb-pts{font-size:22px;font-weight:900;color:var(--ord);line-height:1;}
+.lb-pts-label{font-size:10px;font-weight:700;color:var(--tl);text-transform:uppercase;letter-spacing:.4px;}
+.lb-legend{background:rgba(255,255,255,.6);border:1.5px solid rgba(240,200,160,.25);border-radius:var(--rmd);padding:12px 16px;margin-bottom:14px;display:flex;gap:16px;flex-wrap:wrap;}
+.lb-legend-item{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:var(--tm);}
+.lb-empty{text-align:center;padding:40px 20px;color:var(--tl);font-size:15px;font-weight:700;}
+.lb-me-badge{font-size:10px;font-weight:800;background:rgba(232,135,74,.18);color:var(--ord);border-radius:999px;padding:2px 7px;margin-left:6px;vertical-align:middle;}
+.lb-sql{background:rgba(245,185,140,.08);border:1.5px solid rgba(245,185,140,.3);border-radius:var(--rmd);padding:14px;margin-top:16px;font-size:11px;color:var(--tm);font-weight:600;}
+.lb-sql code{display:block;background:rgba(58,40,24,.05);border-radius:8px;padding:10px;margin-top:8px;font-size:10px;line-height:1.6;white-space:pre-wrap;word-break:break-all;}
+/* MODALS */
+.mo{position:fixed;inset:0;background:rgba(40,20,10,.45);backdrop-filter:blur(5px);z-index:200;display:none;align-items:flex-end;justify-content:center;}.mo.show{display:flex;}
+.ms{background:#fff9f5;border-radius:28px 28px 0 0;padding:24px 22px 44px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;animation:su .3s ease;}
+@keyframes su{from{transform:translateY(100%);}to{transform:translateY(0);}}
+.mh{width:38px;height:4px;border-radius:2px;background:rgba(200,170,140,.3);margin:0 auto 18px;}.mt{font-size:22px;font-weight:900;color:var(--td);margin-bottom:16px;}
+.mr{display:flex;justify-content:space-around;margin:6px 0 16px;}.moo{text-align:center;cursor:pointer;transition:all .2s;}.me{font-size:30px;display:block;margin-bottom:3px;transition:transform .2s;}.moo:hover .me,.moo.sel .me{transform:scale(1.28);}
+.mla{font-size:10px;font-weight:700;color:var(--tl);}.moo.sel .mla{color:var(--ord);font-weight:800;}
+.cq{font-size:14px;font-weight:700;color:var(--tm);margin-bottom:9px;}
+.toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--td);color:white;padding:11px 20px;border-radius:999px;font-size:14px;font-weight:700;z-index:500;opacity:0;transition:all .3s;white-space:nowrap;pointer-events:none;}.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+/* SPEECH BUBBLE */
+.spb{position:relative;display:inline-block;max-width:260px;margin:0 auto 10px;background:rgba(255,255,255,.95);border:1.5px solid rgba(245,185,140,.5);border-radius:16px;padding:10px 14px;font-size:13px;font-weight:800;color:var(--td);box-shadow:0 4px 14px rgba(232,135,74,.15);opacity:0;transform:translateY(6px) scale(.94);transition:all .25s ease;}
+.spb.show{opacity:1;transform:translateY(0) scale(1);}
+.spb::after{content:'';position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);width:14px;height:14px;background:inherit;border-right:1.5px solid rgba(245,185,140,.5);border-bottom:1.5px solid rgba(245,185,140,.5);clip-path:polygon(0 0,100% 0,50% 100%);}
+</style>
+</head>
+<body>
+<div id="load" class="screen active"><div style="text-align:center;"><svg width="110" height="92" viewBox="0 0 110 92" id="lcloud"></svg><div class="lt">Loading Nimbus...</div></div></div>
+<div id="auth" class="screen">
+  <div class="ac">
+    <div class="alo"><svg width="90" height="76" viewBox="0 0 90 76" xmlns="http://www.w3.org/2000/svg"><ellipse cx="45" cy="52" rx="38" ry="19" fill="rgba(245,185,140,.22)"/><ellipse cx="28" cy="40" rx="20" ry="18" fill="#fff5ef"/><ellipse cx="48" cy="36" rx="24" ry="22" fill="#fff8f3"/><ellipse cx="64" cy="42" rx="16" ry="15" fill="#fff5ef"/><ellipse cx="45" cy="50" rx="36" ry="16" fill="#fff8f3"/><ellipse cx="45" cy="44" rx="30" ry="18" fill="#fffaf7" opacity=".8"/><ellipse cx="33" cy="45" rx="7" ry="8.5" fill="#2a1808"/><ellipse cx="55" cy="45" rx="7" ry="8.5" fill="#2a1808"/><ellipse cx="35" cy="43" rx="2.5" ry="3" fill="white"/><ellipse cx="57" cy="43" rx="2.5" ry="3" fill="white"/><ellipse cx="25" cy="50" rx="7" ry="4" fill="rgba(232,135,74,.28)"/><ellipse cx="63" cy="50" rx="7" ry="4" fill="rgba(232,135,74,.28)"/><path d="M37 54 Q45 61 53 54" stroke="#2a1808" stroke-width="2.5" fill="none" stroke-linecap="round" opacity=".75"/></svg></div>
+    <div class="at">Welcome to Nimbus</div><div class="asb" id="authSub">Your personal study cloud ☁️</div>
+    <div class="ae" id="authErr"></div><div id="authForm"></div>
+  </div>
+</div>
+<div id="onboard" class="screen"><div class="oc" style="margin:auto;"><div class="si" id="stepDots"></div><div id="onboardContent"></div></div></div>
+<div id="app" class="screen">
+  <div id="home">
+    <div class="ah"><div class="ag" id="greet">Hey there ☁️</div><div class="ad" id="ddate"></div></div>
+    <div class="asc">
+      <div style="text-align:center;padding:14px 0 4px;">
+        <div id="nBubbleWrap"></div>
+        <div style="display:inline-block;cursor:pointer;transition:transform .3s;" onclick="nimClick()" id="nWrap"><svg id="nSVG" width="200" height="170" viewBox="0 0 200 170" xmlns="http://www.w3.org/2000/svg"></svg></div>
+        <div style="font-size:14px;font-weight:700;color:var(--tm);margin-top:6px;" id="nTxt">Nimbus is here ☁️</div>
+      </div>
+      <div class="cin" id="nudge"><div class="cnt">☁️ How are you feeling today?</div><div class="cns">Nimbus wants to check in before the day starts.</div><button class="bp" style="margin-top:0;" onclick="openCI()">Do Daily Check-In</button></div>
+      <div class="afc"><div class="afq" id="affQ">"Loading your daily spark..."</div><div class="afa" id="affA">— Nimbus</div></div>
+      <div class="secH">Today's Tasks</div><div id="todayList"></div>
+    </div>
+  </div>
+  <div id="tasks" style="display:none;">
+    <div class="th">My Tasks</div><div class="ts" id="taskSub">All your work, organized</div>
+    <button class="atb" onclick="openAddTask()"><span>＋</span> Add New Task</button>
+    <div class="fr"><div class="fc act" onclick="filterT('all',this)">All</div><div class="fc" onclick="filterT('today',this)">Today</div><div class="fc" onclick="filterT('upcoming',this)">Upcoming</div><div class="fc" onclick="filterT('done',this)">Done</div></div>
+    <div id="allTasks"></div>
+  </div>
+
+  <!-- ═══ LEADERBOARD TAB ═══ -->
+  <div id="leaderboard" style="display:none;">
+    <div class="th">Leaderboard 🏆</div>
+    <div class="ts">Today's top students</div>
+    <div class="lb-legend">
+      <div class="lb-legend-item">✅ <span>Task = 10 pts</span></div>
+      <div class="lb-legend-item">🌿 <span>Break = 5 pts</span></div>
+      <div class="lb-legend-item">🔔 <span>Notif = 3 pts</span></div>
+    </div>
+    <div class="lb-date-header">
+      <span class="lb-date-label" id="lbDateLabel">Today</span>
+      <button class="lb-refresh-btn" onclick="loadLeaderboard()">↻ Refresh</button>
+    </div>
+    <div id="lbList"><div class="lb-empty">Loading leaderboard... ☁️</div></div>
+  </div>
+
+  <div id="settings" style="display:none;">
+    <div class="th">Settings</div><div class="ts" id="setUser">Your account</div>
+    <div class="ss">
+      <div class="ssl">Notifications</div>
+      <div class="srow"><div class="srl"><div class="srt">Break Reminders</div><div class="srs" id="breakHint">Adapts to your stress level</div></div><label class="tgl"><input type="checkbox" id="nBreak" onchange="saveN()"><div class="tgs"></div></label></div>
+      <div class="srow" id="bfRow" style="display:none;"><div class="srl"><div class="srt">Break every</div></div><select class="sse" id="bFreq" onchange="saveN()"><option value="20">20 min</option><option value="30">30 min</option><option value="45">45 min</option><option value="60" selected>1 hour</option><option value="90">1.5 hrs</option></select></div>
+      <div class="srow"><div class="srl"><div class="srt">Task Reminders</div><div class="srs">Surface priority tasks</div></div><label class="tgl"><input type="checkbox" id="nTasks" onchange="saveN()"><div class="tgs"></div></label></div>
+      <div class="srow"><div class="srl"><div class="srt">Daily Check-In</div><div class="srs">Morning prompt</div></div><label class="tgl"><input type="checkbox" id="nCI" onchange="saveN()"><div class="tgs"></div></label></div>
+      <div class="srow" id="ciTRow" style="display:none;"><div class="srl"><div class="srt">Check-in time</div></div><input type="time" class="sse" id="ciTime" value="08:00" onchange="saveN()"></div>
+      <div class="srow" style="background:rgba(245,185,140,.08);border-color:rgba(245,185,140,.3);">
+        <div class="srl"><div class="srt">Enable Notifications</div><div class="srs">Required for mobile alerts</div></div>
+        <button class="aib" onclick="requestNotifPermission()" style="font-size:12px;">Allow</button>
+      </div>
+    </div>
+    <div class="ss">
+      <div class="ssl">Account</div>
+      <div class="srow"><div class="srl"><div class="srt" id="setEmail">Email</div><div class="srs" id="setPhone">—</div></div></div>
+      <button class="lb" onclick="logOut()">Log Out</button>
+    </div>
+    <div class="ss">
+      <div class="ssl">Your Profile</div>
+      <div class="srow" style="flex-direction:column;align-items:flex-start;gap:10px;">
+        <div style="font-size:13px;font-weight:700;color:var(--td);width:100%;">Grade</div>
+        <div class="og" id="gradeOpts" style="width:100%;">
+          <div class="ob" onclick="selGrSet(this)">9th Grade</div>
+          <div class="ob" onclick="selGrSet(this)">10th Grade</div>
+          <div class="ob" onclick="selGrSet(this)">11th Grade</div>
+          <div class="ob" onclick="selGrSet(this)">12th Grade</div>
+          <div class="ob" onclick="selGrSet(this)">Other</div>
+        </div>
+      </div>
+      <div class="srow" style="flex-direction:column;align-items:flex-start;gap:10px;margin-top:2px;">
+        <div style="font-size:13px;font-weight:700;color:var(--td);width:100%;">Classes</div>
+        <div class="il" id="setAcL" style="width:100%;"></div>
+        <div class="air" style="width:100%;"><input class="aii" id="setAcI" placeholder="e.g. Calculus, AP History"><select class="ais" id="setAcT"><option>Regular</option><option>Honors</option><option>AP</option><option>IB</option><option>Dual Enrollment</option></select><button class="aib" onclick="addSetAc()">Add</button></div>
+      </div>
+      <div class="srow" style="flex-direction:column;align-items:flex-start;gap:10px;margin-top:2px;">
+        <div style="font-size:13px;font-weight:700;color:var(--td);width:100%;">Extracurriculars</div>
+        <div class="il" id="setEcL" style="width:100%;"></div>
+        <div class="air" style="width:100%;"><input class="aii" id="setEcI" placeholder="e.g. Varsity Soccer, NHS"><select class="ais" id="setEcT"><option>Sports &amp; Athletics</option><option>Arts &amp; Performance</option><option>Clubs &amp; Orgs</option><option>Student Gov</option><option>Work / Job</option><option>Volunteering</option><option>Community Service</option><option>Exam Prep</option><option>Other</option></select><button class="aib" onclick="addSetEc()">Add</button></div>
+      </div>
+      <button class="bp" onclick="saveProfile()" style="margin-top:4px;">Save Profile ✓</button>
+    </div>
+    <div class="ss"><div class="ssl">About</div><div class="srow"><div class="srl"><div class="srt">Nimbus</div><div class="srs">Version 1.0 beta</div></div></div></div>
+  </div>
+  <div id="admin" style="display:none;">
+    <div class="th">Activity Log</div><div class="ts">All-time usage across all users</div>
+    <button class="arefresh" onclick="loadAdminLogs()">↻ Refresh</button>
+    <div id="adminPresenceList"><div style="text-align:center;padding:28px 0;color:var(--tl);font-weight:700;">Loading activity...</div></div>
+  </div>
+  <div class="bn2">
+    <button class="nb act" onclick="swTab('home',this)"><span class="ni">🏠</span><span class="nl">Home</span></button>
+    <button class="nb" onclick="swTab('tasks',this)"><span class="ni">✅</span><span class="nl">Tasks</span></button>
+    <button class="nb" onclick="swTab('leaderboard',this)"><span class="ni">🏆</span><span class="nl">Ranks</span></button>
+    <button class="nb" id="adminNavBtn" style="display:none;" onclick="swTab('admin',this)"><span class="ni">📡</span><span class="nl">Activity</span></button>
+    <button class="nb" onclick="swTab('settings',this)"><span class="ni">⚙️</span><span class="nl">Settings</span></button>
+  </div>
+</div>
+<div id="timer" class="screen">
+  <button onclick="closeTimer()" style="position:absolute;top:52px;left:20px;background:rgba(255,255,255,.1);border:none;color:white;font-size:24px;width:42px;height:42px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;">‹</button>
+  <div class="ttn" id="tName">Task Timer</div><div class="tph" id="tPhase">Focus Session</div>
+  <div class="tcw"><svg class="tsvg" viewBox="0 0 252 252"><circle class="ttr" cx="126" cy="126" r="110"/><circle class="tpr" id="tProg" cx="126" cy="126" r="110" stroke-dasharray="691" stroke-dashoffset="0" stroke="#f5a96a"/></svg><div class="tce"><div class="tdi" id="tDisp">25:00</div><div class="tsu">minutes remaining</div></div></div>
+  <div class="tct"><button class="tbtn sb" onclick="resetTimer()">↺</button><button class="tbtn pp" id="tPlay" onclick="toggleTimer()">▶</button></div>
+  <button class="bop" onclick="offerBreak()" style="margin-top:22px;">🌿 Take a Break</button>
+  <div class="bsg" id="bSug"><div class="bst">🌿 Time for a break!</div><div style="font-size:12px;color:rgba(255,255,255,.5);font-weight:600;">Choose your break:</div><div class="bso"><button class="bop" onclick="startBreak(5)">5 min</button><button class="bop" onclick="startBreak(10)">10 min</button><button class="bop" onclick="startBreak(15)">15 min</button></div></div>
+</div>
+<!-- MODALS -->
+<div class="mo" id="ciModal" onclick="closeMO(event,'ciModal')"><div class="ms"><div class="mh"></div><div class="mt">Daily Check-In ☁️</div><div style="font-size:13px;color:var(--tl);font-weight:600;margin-bottom:14px;" id="ciDate"></div><div class="cq">How are you feeling right now?</div><div class="mr" id="moodRow"><div class="moo" onclick="selMood(0)"><span class="me">😰</span><span class="mla">Stressed</span></div><div class="moo" onclick="selMood(1)"><span class="me">😔</span><span class="mla">Low</span></div><div class="moo" onclick="selMood(2)"><span class="me">😐</span><span class="mla">Okay</span></div><div class="moo" onclick="selMood(3)"><span class="me">🙂</span><span class="mla">Good</span></div><div class="moo" onclick="selMood(4)"><span class="me">🌟</span><span class="mla">Great</span></div></div><div class="cq">Workload today (1–10):</div><div class="sr" style="margin-bottom:16px;"><div class="st"><input type="range" min="1" max="10" value="5" id="wlS" oninput="updS(this,'wlV')"></div><div class="sv" id="wlV">5</div></div><div class="cq">How overwhelmed do you feel? (1–10):</div><div class="sr" style="margin-bottom:22px;"><div class="st"><input type="range" min="1" max="10" value="5" id="owS" oninput="updS(this,'owV')"></div><div class="sv" id="owV">5</div></div><button class="bp" onclick="submitCI()">Update Nimbus ☁️</button></div></div>
+<div class="mo" id="addTaskModal" onclick="closeMO(event,'addTaskModal')"><div class="ms"><div class="mh"></div><div class="mt">Add Task</div><div class="fg"><label class="fl">Task name</label><input class="fi" id="tName2" placeholder="What do you need to do?" type="text"></div><div class="fg"><label class="fl">Category</label><select class="fi" id="tCat" onchange="updSubcats()"><option value="">Choose a category</option></select></div><div class="fg" id="subG" style="display:none;"><label class="fl">Subject / Activity</label><select class="fi" id="tSubcat"></select></div><div class="fg"><label class="fl">Estimated time</label><div class="og" id="timeOpts"><div class="ob" onclick="selO(this,'timeOpts')">15 min</div><div class="ob" onclick="selO(this,'timeOpts')">30 min</div><div class="ob" onclick="selO(this,'timeOpts')">45 min</div><div class="ob" onclick="selO(this,'timeOpts')">1 hr</div><div class="ob" onclick="selO(this,'timeOpts')">1.5 hr</div><div class="ob" onclick="selO(this,'timeOpts')">2+ hr</div></div></div><div class="fg"><label class="fl">Priority</label><div class="og" id="priOpts"><div class="ob" onclick="selO(this,'priOpts')">🔴 Urgent</div><div class="ob" onclick="selO(this,'priOpts')">🟠 Medium</div><div class="ob" onclick="selO(this,'priOpts')">🟢 Low</div><div class="ob" onclick="selO(this,'priOpts')">📚 Study</div></div></div><div class="fg"><label class="fl">Due date</label><input class="fi" id="tDue" type="date"></div><button class="bp" onclick="addTask()">Add Task ✓</button></div></div>
+<div class="mo" id="taskDetail" onclick="closeMO(event,'taskDetail')"><div class="ms"><div class="mh"></div><div class="mt" id="dtName">Task</div><div style="font-size:14px;color:var(--tm);font-weight:600;margin-bottom:20px;" id="dtMeta"></div><button class="bp" id="dtTimerBtn" onclick="launchTimer()" style="margin-bottom:8px;">⏱ Start Focus Timer</button><button class="bs" onclick="openEdit()">✏️ Edit Task</button><button class="bs" id="dtCompleteBtn" onclick="doneDetail()">✓ Mark Complete</button><button class="bs" onclick="delTask()" style="color:#c05030;border-color:rgba(220,100,80,.25);margin-top:4px;">Delete Task</button></div></div>
+<div class="mo" id="editModal" onclick="closeMO(event,'editModal')"><div class="ms"><div class="mh"></div><div class="mt">Edit Task</div><div class="fg"><label class="fl">Task name</label><input class="fi" id="eName" type="text"></div><div class="fg"><label class="fl">Estimated time</label><div class="og" id="eTimeOpts"><div class="ob" onclick="selO(this,'eTimeOpts')">15 min</div><div class="ob" onclick="selO(this,'eTimeOpts')">30 min</div><div class="ob" onclick="selO(this,'eTimeOpts')">45 min</div><div class="ob" onclick="selO(this,'eTimeOpts')">1 hr</div><div class="ob" onclick="selO(this,'eTimeOpts')">1.5 hr</div><div class="ob" onclick="selO(this,'eTimeOpts')">2+ hr</div></div></div><div class="fg"><label class="fl">Priority</label><div class="og" id="ePriOpts"><div class="ob" onclick="selO(this,'ePriOpts')">🔴 Urgent</div><div class="ob" onclick="selO(this,'ePriOpts')">🟠 Medium</div><div class="ob" onclick="selO(this,'ePriOpts')">🟢 Low</div><div class="ob" onclick="selO(this,'ePriOpts')">📚 Study</div></div></div><div class="fg"><label class="fl">Due date</label><input class="fi" id="eDue" type="date"></div><button class="bp" onclick="saveEdit()">Save Changes ✓</button></div></div>
+<div class="toast" id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// PWA MANIFEST
+(function(){
+  try{
+    const m={name:'Nimbus',short_name:'Nimbus',description:'Your personal study cloud',start_url:location.href,display:'standalone',orientation:'portrait',background_color:'#feecd8',theme_color:'#e8874a',
+      icons:[{src:'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E%3Crect width=\'100\' height=\'100\' rx=\'20\' fill=\'%23feecd8\'/%3E%3Cellipse cx=\'50\' cy=\'58\' rx=\'38\' ry=\'18\' fill=\'white\'/%3E%3Cellipse cx=\'34\' cy=\'44\' rx=\'20\' ry=\'17\' fill=\'white\'/%3E%3Cellipse cx=\'54\' cy=\'40\' rx=\'24\' ry=\'21\' fill=\'white\'/%3E%3Cellipse cx=\'70\' cy=\'46\' rx=\'16\' ry=\'15\' fill=\'white\'/%3E%3C/svg%3E',sizes:'192x192',type:'image/svg+xml'}]};
+    const blob=new Blob([JSON.stringify(m)],{type:'application/manifest+json'});
+    const url=URL.createObjectURL(blob);
+    const link=document.createElement('link');link.rel='manifest';link.href=url;
+    document.head.appendChild(link);
+  }catch(e){}
+})();
+
+// SERVICE WORKER
+(function(){
+  if(!('serviceWorker' in navigator))return;
+  const swCode=`
+self.addEventListener('install',e=>self.skipWaiting());
+self.addEventListener('activate',e=>e.waitUntil(clients.claim()));
+self.addEventListener('push',e=>{
+  const d=e.data?e.data.json():{title:'Nimbus ☁️',body:'Hey!'};
+  e.waitUntil(self.registration.showNotification(d.title||'Nimbus',{body:d.body||'',icon:d.icon||'',badge:d.badge||'',tag:d.tag||'nimbus',data:d.data||{}}));
+});
+self.addEventListener('notificationclick',e=>{
+  const data=e.notification.data||{};
+  e.notification.close();
+  e.waitUntil(clients.matchAll({type:'window',includeUncontrolled:true}).then(cs=>{
+    for(const c of cs){
+      if(c.url&&'focus' in c){c.postMessage({nimbusNotifClick:true,data});return c.focus();}
+    }
+    const qs=new URLSearchParams();if(data.type)qs.set('open',data.type);if(data.id!=null)qs.set('id',data.id);
+    const target=self.registration.scope+(qs.toString()?('?'+qs.toString()):'');
+    if(clients.openWindow)return clients.openWindow(target);
+  }));
+});
+`;
+  try{
+    const blob=new Blob([swCode],{type:'application/javascript'});
+    const url=URL.createObjectURL(blob);
+    navigator.serviceWorker.register(url).then(reg=>{
+      console.log('SW registered');
+      window._swReg=reg;
+    }).catch(e=>console.log('SW reg failed (needs HTTPS):',e.message));
+  }catch(e){}
+})();
+
+const SB_URL='https://efnbwiyycuupgalwakws.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVmbmJ3aXl5Y3V1cGdhbHdha3dzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0NTExOTAsImV4cCI6MjA5NjAyNzE5MH0.3GKnnIwbGN9RG3xUKeh8GTwt--XkNuAjAdTh9BG2g2Q';
+let sb=null;try{sb=supabase.createClient(SB_URL,SB_KEY);}catch(e){}
+
+// ═══ ADMIN + ACTIVITY LOGGING ═══
+const ADMIN_EMAIL='nimbus3000k@gmail.com';
+function isAdmin(){return!!(S.email&&S.email.trim().toLowerCase()===ADMIN_EMAIL.trim().toLowerCase());}
+let _sec=null,_secStart=null;
+function startSection(name){endSection();_sec=name;_secStart=Date.now();}
+async function endSection(){if(!_sec||!_secStart)return;const endedMs=Date.now();const secs=Math.round((endedMs-_secStart)/1000);const section=_sec;_sec=null;_secStart=null;if(secs<3)return;await logActivity(section,secs,new Date(endedMs));}
+async function logActivity(section,durationSecs,endedAt){if(!sb||!S.userId||S.userId==='demo'||S.userId.startsWith('demo-'))return;try{const startedAt=new Date(endedAt.getTime()-durationSecs*1000);await sb.from('activity_logs').insert({user_id:S.userId,user_name:S.name||'Unknown',section,duration_secs:durationSecs,started_at:startedAt.toISOString(),ended_at:endedAt.toISOString()});}catch(e){console.error('Activity log failed',e);}}
+async function loadAdminLogs(){if(!sb||!isAdmin())return;const el=document.getElementById('adminPresenceList');if(el)el.innerHTML='<div style="text-align:center;padding:20px;color:var(--tl);font-weight:700;">Loading...</div>';try{const{data,error}=await sb.from('activity_logs').select('*').order('ended_at',{ascending:false}).limit(1000);if(error){if(el)el.innerHTML='<div style="color:#c05030;padding:20px;font-weight:700;">Error: '+error.message+'<br><br><b>Run this SQL in Supabase first:</b><br><code style="font-size:11px;display:block;margin-top:8px;background:rgba(0,0,0,.05);padding:8px;border-radius:6px;white-space:pre-wrap;">CREATE TABLE IF NOT EXISTS activity_logs (\n  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,\n  user_id uuid, user_name text, section text,\n  duration_secs integer, started_at timestamptz,\n  ended_at timestamptz DEFAULT now()\n);\nALTER TABLE activity_logs ENABLE ROW LEVEL SECURITY;\nCREATE POLICY "insert_own" ON activity_logs FOR INSERT TO authenticated WITH CHECK (auth.uid()=user_id);\nCREATE POLICY "read_all" ON activity_logs FOR SELECT TO authenticated USING (true);</code></div>';return;}renderAdminView(data||[]);}catch(e){console.error('loadAdminLogs failed',e);}}
+function fmtSecs(s){if(s<60)return s+'s';if(s<3600)return Math.floor(s/60)+'m '+(s%60)+'s';return Math.floor(s/3600)+'h '+Math.floor((s%3600)/60)+'m';}
+function fmtDate(iso){const d=new Date(iso);return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})+' '+d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});}
+function renderAdminView(logs){const el=document.getElementById('adminPresenceList');if(!el)return;if(!logs.length){el.innerHTML='<div style="text-align:center;padding:28px 0;color:var(--tl);font-weight:700;">No activity recorded yet.</div>';return;}const users={};for(const log of logs){const uid=log.user_id;if(!users[uid])users[uid]={name:log.user_name||'Unknown',sections:{},lastSeen:null,firstSeen:null,recentLogs:[]};users[uid].sections[log.section]=(users[uid].sections[log.section]||0)+log.duration_secs;if(!users[uid].lastSeen||log.ended_at>users[uid].lastSeen)users[uid].lastSeen=log.ended_at;if(!users[uid].firstSeen||log.started_at<users[uid].firstSeen)users[uid].firstSeen=log.started_at;if(users[uid].recentLogs.length<8)users[uid].recentLogs.push(log);}const SEC_LABELS={home:'🏠 Home',tasks:'✅ Tasks',settings:'⚙️ Settings',focusing:'⏱ Focus Timer',break:'🌿 Break',admin:'📡 Activity Tab'};const sorted=Object.entries(users).sort((a,b)=>b[1].lastSeen.localeCompare(a[1].lastSeen));let html='';for(const[uid,u]of sorted){const totalSecs=Object.values(u.sections).reduce((a,b)=>a+b,0);html+=`<div class="auser"><div class="auser-name">${u.name}</div><div class="auser-seen">Last seen: ${fmtDate(u.lastSeen)} · First seen: ${fmtDate(u.firstSeen)} · Total: ${fmtSecs(totalSecs)}</div><div class="asec-grid">${Object.entries(u.sections).map(([sec,secs])=>`<div class="asec-pill">${SEC_LABELS[sec]||sec}<span>${fmtSecs(secs)}</span></div>`).join('')}</div><div style="font-size:11px;font-weight:800;color:var(--tl);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;">Recent Sessions</div>${u.recentLogs.map(l=>`<div class="alog-item">${SEC_LABELS[l.section]||l.section} · ${fmtSecs(l.duration_secs)} · ${fmtDate(l.ended_at)}</div>`).join('')}</div>`;}el.innerHTML=html;}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){endSection();}else{if(_lastTab)startSection(_lastTab);}});
+window.addEventListener('beforeunload',()=>{endSection();});
+let _lastTab='home';
+
+// ═══ STATE ═══
+let S={userId:null,email:'',phone:'',name:'',grade:'',categories:[],tasks:[],mood:2,workload:5,overwhelm:5,nimbusState:'neutral',notifs:{break:false,breakFreq:60,tasks:false,checkin:false,checkinTime:'08:00'},lastCI:null,burnoutHistory:[],onboardStress:null,dailyStats:{date:'',breaks:0,tasksDone:0}};
+let TMR={active:false,iv:null,rem:1500,total:1500,phase:'focus',taskId:null,name:'',bc:0};
+let NI=[],detId=null,curF='all',selM=2,_re=null;
+
+function today(){const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+function isToday(s){return s===today();}
+function ensureDailyStats(){const d=today();if(!S.dailyStats||S.dailyStats.date!==d){S.dailyStats={date:d,breaks:0,tasksDone:0};}}
+function ciDone(){return S.lastCI===today();}
+
+function getBurnoutLevel(){const avg=(S.overwhelm+S.workload)/2;if(avg>=8.5)return'critical';if(avg>=7)return'high';if(avg>=5)return'moderate';if(avg>=3)return'low';return'minimal';}
+function getAdaptiveBreakMins(){const lvl=getBurnoutLevel();if(lvl==='critical')return 20;if(lvl==='high')return 30;if(lvl==='moderate')return 45;return S.notifs.breakFreq||60;}
+function updateBurnoutAlert(){const lvl=getBurnoutLevel();const bh=document.getElementById('breakHint');if(bh){const mins=getAdaptiveBreakMins();bh.textContent=(lvl==='critical'||lvl==='high')?`Auto-set to ${mins} min based on your stress`:'Adapts to your stress level';}}
+function updateNimbusState(){
+  ensureDailyStats();
+  const avg=(S.overwhelm+S.workload)/2;const checkinScore=10-avg;
+  const pending=S.tasks.filter(t=>!t.done).length;const done=S.tasks.filter(t=>t.done).length;
+  const urgentPending=S.tasks.filter(t=>!t.done&&t.priority==='Urgent').length;
+  let taskScore=(done*1.8)-(pending*1.2)-(urgentPending*0.8);taskScore=Math.max(-4,Math.min(4,taskScore));
+  // Today's effort — completed tasks and breaks taken actively lift the mood, even under a heavy check-in
+  const effort=(S.dailyStats.tasksDone*1.5)+(S.dailyStats.breaks*1.2);
+  const effortScore=Math.max(0,Math.min(4,effort));
+  let score=checkinScore+taskScore+effortScore;score=Math.max(0,Math.min(10,score));
+  if(score<=1.2&&effortScore<1.5){S.nimbusState='crying';}
+  else if(S.overwhelm>=9&&pending>=5&&effortScore<2){S.nimbusState='fear';}
+  else if((S.workload>=9||pending>=8)&&effortScore<2.5){S.nimbusState='exhausted';}
+  else if(S.overwhelm>=7&&urgentPending>=2&&effortScore<2){S.nimbusState='worried';}
+  else if((S.workload>=7||pending>=5)&&effortScore<3){S.nimbusState='tired';}
+  else if(score>=8.5){S.nimbusState=(pending===0&&done>=5)?'proud':'glowing';}
+  else if(score>=6.5)S.nimbusState=effortScore>=2?'excited':'happy';
+  else if(score>=4)S.nimbusState='neutral';
+  else if(score>=2)S.nimbusState='sad';
+  else S.nimbusState='stressed';
+}
+
+
+// ═══ AUTH ═══
+function renderAuth(mode='login'){const isL=mode==='login';document.getElementById('authSub').textContent=isL?'Sign in to your account ☁️':'Create your account ☁️';document.getElementById('authErr').classList.remove('show');document.getElementById('authForm').innerHTML=`${!isL?`<div class="fg"><label class="fl">Your Name</label><input class="fi" id="aName" placeholder="First name" type="text"></div>`:''}    <div class="fg"><label class="fl">Email</label><input class="fi" id="aEmail" placeholder="you@email.com" type="email"></div>    ${!isL?`<div class="fg"><label class="fl">Phone (optional)</label><input class="fi" id="aPhone" placeholder="+1 555 000 0000" type="tel"></div>`:''}    <div class="fg"><label class="fl">Password</label><input class="fi" id="aPass" placeholder="Password" type="password" onkeydown="if(event.key==='Enter')${isL?'doLogin()':'doSignup()'}"></div>    <button class="bp" onclick="${isL?'doLogin()':'doSignup()'}"> ${isL?'Sign In →':'Create Account →'}</button>    <div class="asw">${isL?"Don't have an account? <span onclick=\"renderAuth('signup')\">Sign up</span>":"Already have an account? <span onclick=\"renderAuth('login')\">Sign in</span>"}</div>    <div style="text-align:center;margin-top:12px;"><span style="font-size:13px;font-weight:700;color:var(--ord);cursor:pointer;" onclick="skipAuth()">Continue without account (demo)</span></div>`;}
+function showLoad(){document.getElementById('load').classList.add('active');['auth','app','onboard'].forEach(s=>document.getElementById(s).classList.remove('active'));}
+function hideLoad(){document.getElementById('load').classList.remove('active');}
+function showScrn(id){['load','auth','onboard','app','timer'].forEach(s=>{const e=document.getElementById(s);if(e)e.classList.remove('active');});const t=document.getElementById(id);if(t)t.classList.add('active');}
+async function doLogin(){const email=document.getElementById('aEmail').value.trim();const pass=document.getElementById('aPass').value;if(!email||!pass){authErr('Please fill in all fields.');return;}if(!sb){S.email=email;S.userId='demo-'+Date.now();afterAuth();return;}showLoad();const{data,error}=await sb.auth.signInWithPassword({email,password:pass});if(error){hideLoad();showScrn('auth');authErr(error.message.includes('Invalid')?'Wrong email or password.':error.message);return;}S.userId=data.user.id;S.email=data.user.email;_re=null;await loadCloud();if(!S.name)loadLocal();hideLoad();if(S.name&&S.name.trim()!=='')startApp();else startOnboard();}
+async function doSignup(){const n=document.getElementById('aName')?.value.trim()||'';const email=document.getElementById('aEmail').value.trim();const phone=document.getElementById('aPhone')?.value.trim()||'';const pass=document.getElementById('aPass').value;if(!n){authErr('Please enter your name.');return;}if(!email||!pass){authErr('Please fill in email and password.');return;}if(pass.length<6){authErr('Password must be at least 6 characters.');return;}if(!sb){S.name=n;S.email=email;S.phone=phone;S.userId='demo-'+Date.now();saveLocal();startOnboard();return;}showLoad();const{data,error}=await sb.auth.signUp({email,password:pass,options:{data:{name:n,phone}}});if(error){hideLoad();showScrn('auth');authErr(error.message);return;}if(!data.session)console.warn('No session after signup — email confirmation may be required.');S.userId=data.user.id;S.name=n;S.email=email;S.phone=phone;_re=null;saveLocal();hideLoad();startOnboard();}
+function skipAuth(){S.userId='demo';S.email='demo@nimbus.app';if(loadLocal()&&S.name)startApp();else startOnboard();}
+function authErr(m){const e=document.getElementById('authErr');e.textContent=m;e.classList.add('show');}
+async function afterAuth(){hideLoad();await loadCloud();if(!S.name)loadLocal();if(S.name&&S.name.trim()!=='')startApp();else startOnboard();}
+function logOut(){if(sb)sb.auth.signOut();endSection();stopNI();clearInterval(TMR.iv);S={userId:null,email:'',phone:'',name:'',grade:'',categories:[],tasks:[],mood:2,workload:5,overwhelm:5,nimbusState:'neutral',notifs:{break:false,breakFreq:60,tasks:false,checkin:false,checkinTime:'08:00'},lastCI:null,burnoutHistory:[],onboardStress:null,dailyStats:{date:'',breaks:0,tasksDone:0}};_re=null;_sec=null;_secStart=null;_lastTab='home';showScrn('auth');renderAuth('login');}
+
+// ═══ ONBOARDING ═══
+const CATS={academic:{name:'Academic',icon:'📚',color:'orange',subcatTypes:['Regular','Honors','AP','IB','Dual Enrollment'],hint:'e.g. Calculus, English 11, AP US History'}};
+const EC_T=['Sports & Athletics','Arts & Performance','Clubs & Orgs','Student Gov','Work / Job','Volunteering','Community Service','Exam Prep','Other'];
+const STEPS=[
+  {title:"Hey, I'm Nimbus! ☁️",sub:"Your personal study cloud. Let's set up your world.",type:"welcome"},
+  {title:"What grade are you in?",sub:"Helps Nimbus understand your workload.",type:"grade"},
+  {title:"Add your classes",sub:"Build your academic schedule.",type:"cat_ac"},
+  {title:"Add your extracurriculars",sub:"Add every club, sport, job, or org.",type:"cat_ec"},
+  {title:"You're all set! 🌈",sub:"Nimbus is ready. Let's build some momentum together.",type:"finish"}
+];
+function startOnboard(){showScrn('onboard');document.getElementById('stepDots').innerHTML=STEPS.map((_,i)=>`<div class="sd" id="d${i}"></div>`).join('');renderStep(0);}
+function updDots(){STEPS.forEach((_,i)=>{const d=document.getElementById('d'+i);if(d)d.className='sd'+(i<S.onboardStep?' dn':i===S.onboardStep?' act':'');});}
+function renderStep(n){
+  if(!S.onboardStep&&S.onboardStep!==0)S.onboardStep=0;S.onboardStep=n;updDots();
+  const s=STEPS[n];const initMood=s.type==='finish'?'glowing':s.type==='welcome'?'happy':'neutral';let h=`<div class="cc"><div id="onboardBubbleWrap"></div><svg id="onboardCloudSVG" width="110" height="92" viewBox="0 0 110 92" xmlns="http://www.w3.org/2000/svg">${buildCloud(initMood,110,92,.66)}</svg></div><div class="ot">${s.title}</div><div class="os">${s.sub}</div>`;
+  if(s.type==='welcome')h+=`<button class="bp" onclick="nextS()">Let's Go! 🌤️</button>`;
+  else if(s.type==='grade')h+=`<div class="og" id="grOpts">${["9th Grade","10th Grade","11th Grade","12th Grade","Other"].map(o=>`<div class="ob" onclick="selGr(this)">${o}</div>`).join('')}</div><button class="bp" onclick="nextS()">Continue →</button>`;
+  else if(s.type==='cat_ac')h+=renderAcB()+`<button class="bp" onclick="nextS()">Continue →</button>`;
+  else if(s.type==='cat_ec')h+=renderECB()+`<button class="bp" onclick="nextS()">Continue →</button>`;
+  else if(s.type==='finish')h+=`<button class="bp" onclick="finOnboard()">Meet Nimbus! 🌈</button>`;
+  document.getElementById('onboardContent').innerHTML=h;updAllS();
+}
+function renderAcB(){const cat=getCat('academic')||addCT('academic');return`<div style="margin-bottom:12px;"><div class="air"><input class="aii" id="acI" placeholder="${CATS.academic.hint}" onkeydown="if(event.key==='Enter'){event.preventDefault();addAcI();}"><select class="ais" id="acT">${CATS.academic.subcatTypes.map(t=>`<option>${t}</option>`).join('')}</select></div></div><div class="il" id="acL">${renderAcL(cat)}</div>`;}
+function renderAcL(cat){if(!cat?.subcats?.length)return`<div style="font-size:13px;color:var(--tl);font-weight:700;padding:8px 4px;">No classes added yet</div>`;return cat.subcats.map(s=>`<div class="ir"><div><div class="irt">${s.name}</div><div class="irs">${s.type||''}</div></div><button class="irm" onclick="rmSub('academic','${s.id}')">×</button></div>`).join('');}
+function addAcI(){const n=document.getElementById('acI').value.trim();const t=document.getElementById('acT').value;if(!n)return;let c=getCat('academic')||addCT('academic');c.subcats.push({id:'ac_'+Date.now(),name:n,type:t});document.getElementById('acI').value='';document.getElementById('acL').innerHTML=renderAcL(c);evalOnboardPersonality('cat_ac');}
+function renderECB(){return`<div style="margin-bottom:12px;"><div class="air"><input class="aii" id="ecI" placeholder="e.g. Varsity Soccer, NHS, Part-time Job" onkeydown="if(event.key==='Enter'){event.preventDefault();addECI();}"><select class="ais" id="ecT">${EC_T.map(t=>`<option>${t}</option>`).join('')}</select></div></div><div class="il" id="ecL">${renderECL()}</div>`;}
+function renderECL(){const ecs=S.categories.filter(c=>c.type==='ec');if(!ecs.length)return`<div style="font-size:13px;color:var(--tl);font-weight:700;padding:8px 4px;">No activities added yet</div>`;return ecs.map(c=>`<div class="ir"><div><div class="irt">${c.name}</div><div class="irs">${c.ecType||''}</div></div><button class="irm" onclick="rmEC('${c.id}')">×</button></div>`).join('');}
+function addECI(){const n=document.getElementById('ecI').value.trim();const t=document.getElementById('ecT').value;if(!n)return;S.categories.push({id:'ec_'+Date.now(),name:n,icon:ecI(t),color:'pink',type:'ec',ecType:t,subcats:[]});document.getElementById('ecI').value='';document.getElementById('ecL').innerHTML=renderECL();evalOnboardPersonality('cat_ec');}
+function rmEC(id){S.categories=S.categories.filter(c=>c.id!==id);const e=document.getElementById('ecL');if(e)e.innerHTML=renderECL();}
+function ecI(t){return({'Sports & Athletics':'⚽','Arts & Performance':'🎨','Clubs & Orgs':'🏛️','Student Gov':'🌟','Work / Job':'💼','Volunteering':'🤝','Community Service':'🌱','Exam Prep':'📝','Other':'✨'})[t]||'✨';}
+function getCat(t){return S.categories.find(c=>c.type===t);}
+function addCT(t){const c=CATS[t];const cat={id:t+'_'+Date.now(),name:c.name,icon:c.icon,color:c.color,type:t,subcats:[]};S.categories.push(cat);return cat;}
+function rmSub(ct,id){const c=getCat(ct);if(!c)return;c.subcats=c.subcats.filter(s=>s.id!==id);const e=document.getElementById('acL');if(e)e.innerHTML=renderAcL(c);}
+function selGr(el){document.querySelectorAll('#grOpts .ob').forEach(b=>b.classList.remove('sel'));el.classList.add('sel');S.grade=el.textContent;}
+function nextS(){if(S.onboardStep<STEPS.length-1)renderStep(S.onboardStep+1);}
+async function finOnboard(){const nameInput=document.getElementById('aName');if(nameInput&&nameInput.value.trim())S.name=nameInput.value.trim();saveLocal();await save();await new Promise(r=>setTimeout(r,500));showScrn('app');startApp();}
+
+// ═══ NIMBUS SVG ═══
+function nColors(mood){const m={neutral:{c1:'rgba(255,252,248,1)',c2:'rgba(250,243,238,1)',c3:'rgba(255,255,255,.9)',sh:'rgba(245,185,140,.18)',ri:'rgba(235,210,190,.3)',ey:'#2a1808',bl:'rgba(232,135,74,.3)'},excited:{c1:'rgba(255,245,210,1)',c2:'rgba(255,228,170,1)',c3:'rgba(255,252,225,.95)',sh:'rgba(255,200,80,.3)',ri:'rgba(255,220,120,.4)',ey:'#2b1808',bl:'rgba(255,160,90,.35)'},love:{c1:'rgba(255,235,242,1)',c2:'rgba(255,215,228,1)',c3:'rgba(255,245,248,.9)',sh:'rgba(255,120,170,.25)',ri:'rgba(255,180,210,.35)',ey:'#311018',bl:'rgba(255,120,160,.4)'},shy:{c1:'rgba(255,245,245,1)',c2:'rgba(250,235,235,1)',c3:'rgba(255,250,250,.9)',sh:'rgba(255,180,180,.18)',ri:'rgba(255,200,200,.25)',ey:'#2a1808',bl:'rgba(255,90,130,.45)'},tired:{c1:'rgba(225,230,238,1)',c2:'rgba(215,220,230,1)',c3:'rgba(235,240,248,.9)',sh:'rgba(150,160,190,.28)',ri:'rgba(180,190,210,.3)',ey:'#303850',bl:'rgba(120,140,170,.15)'},exhausted:{c1:'rgba(195,200,215,1)',c2:'rgba(180,188,205,1)',c3:'rgba(205,212,225,.9)',sh:'rgba(110,120,145,.3)',ri:'rgba(135,145,170,.4)',ey:'#252c42',bl:'rgba(90,100,130,.15)'},fear:{c1:'rgba(215,228,255,1)',c2:'rgba(200,220,250,1)',c3:'rgba(235,245,255,.95)',sh:'rgba(130,165,255,.25)',ri:'rgba(150,185,255,.35)',ey:'#14223c',bl:'rgba(120,170,255,.2)'},worried:{c1:'rgba(225,232,248,1)',c2:'rgba(212,222,240,1)',c3:'rgba(235,242,252,.95)',sh:'rgba(120,150,220,.25)',ri:'rgba(160,185,240,.35)',ey:'#20304a',bl:'rgba(120,160,220,.2)'},crying:{c1:'rgba(205,220,245,1)',c2:'rgba(190,210,240,1)',c3:'rgba(225,238,255,.95)',sh:'rgba(110,150,230,.35)',ri:'rgba(145,180,235,.45)',ey:'#1b2f4b',bl:'rgba(100,150,220,.2)'},proud:{c1:'rgba(255,247,225,1)',c2:'rgba(252,236,205,1)',c3:'rgba(255,252,238,.95)',sh:'rgba(240,195,80,.25)',ri:'rgba(245,210,120,.35)',ey:'#2b1808',bl:'rgba(240,160,70,.3)'},celebrating:{c1:'rgba(255,245,205,1)',c2:'rgba(255,228,165,1)',c3:'rgba(255,250,220,.95)',sh:'rgba(255,205,60,.35)',ri:'rgba(255,220,90,.45)',ey:'#2a1808',bl:'rgba(255,175,80,.35)'},sad:{c1:'rgba(210,225,248,1)',c2:'rgba(195,215,244,1)',c3:'rgba(222,235,252,.9)',sh:'rgba(120,165,232,.3)',ri:'rgba(160,190,238,.4)',ey:'#1e2a3a',bl:'rgba(120,160,220,.28)'},stressed:{c1:'rgba(182,192,220,1)',c2:'rgba(168,180,215,1)',c3:'rgba(198,208,228,.9)',sh:'rgba(100,120,185,.38)',ri:'rgba(128,145,198,.45)',ey:'#1a2038',bl:'rgba(100,118,185,.24)'},glowing:{c1:'rgba(255,253,218,1)',c2:'rgba(254,248,190,1)',c3:'rgba(255,255,232,.9)',sh:'rgba(245,215,70,.28)',ri:'rgba(242,212,90,.42)',ey:'#2a1e06',bl:'rgba(235,165,70,.35)'},smug:{c1:'rgba(255,248,238,1)',c2:'rgba(252,235,218,1)',c3:'rgba(255,252,245,.9)',sh:'rgba(245,185,140,.22)',ri:'rgba(235,210,185,.35)',ey:'#2a1808',bl:'rgba(225,120,60,.32)'},annoyed:{c1:'rgba(255,232,220,1)',c2:'rgba(250,210,195,1)',c3:'rgba(255,238,228,.9)',sh:'rgba(220,110,70,.32)',ri:'rgba(220,130,90,.4)',ey:'#3a1408',bl:'rgba(220,90,50,.35)'},happy:{c1:'rgba(255,250,235,1)',c2:'rgba(252,242,218,1)',c3:'rgba(255,254,242,.9)',sh:'rgba(245,205,100,.22)',ri:'rgba(242,218,140,.35)',ey:'#2a1808',bl:'rgba(232,155,70,.3)'}};return m[mood]||m.neutral;}
+function buildCloud(mood,w,h,sc=1){
+  const c=nColors(mood),cx=w/2,cy=h*.53;
+  const body=`<ellipse cx="${cx}" cy="${cy+9*sc}" rx="${70*sc}" ry="${33*sc}" fill="${c.sh}"/><ellipse cx="${cx-18*sc}" cy="${cy-10*sc}" rx="${33*sc}" ry="${29*sc}" fill="${c.c1}"/><ellipse cx="${cx+18*sc}" cy="${cy-14*sc}" rx="${37*sc}" ry="${33*sc}" fill="${c.c1}"/><ellipse cx="${cx+46*sc}" cy="${cy-2*sc}" rx="${25*sc}" ry="${23*sc}" fill="${c.c2}"/><ellipse cx="${cx-46*sc}" cy="${cy+2*sc}" rx="${21*sc}" ry="${19*sc}" fill="${c.c2}"/><ellipse cx="${cx}" cy="${cy+10*sc}" rx="${66*sc}" ry="${25*sc}" fill="${c.c3}"/><ellipse cx="${cx}" cy="${cy+4*sc}" rx="${56*sc}" ry="${27*sc}" fill="${c.c1}"/>`;
+  const rim=`<ellipse cx="${cx-15*sc}" cy="${cy-8*sc}" rx="${33*sc}" ry="${29*sc}" fill="none" stroke="${c.ri}" stroke-width="${1.4*sc}"/><ellipse cx="${cx+16*sc}" cy="${cy-12*sc}" rx="${35*sc}" ry="${31*sc}" fill="none" stroke="${c.ri}" stroke-width="${1.4*sc}"/>`;
+  const eL=cx-14*sc,eR=cx+14*sc,eY=cy-2*sc;
+  const eyes=`<ellipse cx="${eL}" cy="${eY}" rx="${7*sc}" ry="${8.5*sc}" fill="${c.ey}"/><ellipse cx="${eR}" cy="${eY}" rx="${7*sc}" ry="${8.5*sc}" fill="${c.ey}"/><ellipse cx="${eL+2*sc}" cy="${eY-2.5*sc}" rx="${2.5*sc}" ry="${3*sc}" fill="white"/><ellipse cx="${eR+2*sc}" cy="${eY-2.5*sc}" rx="${2.5*sc}" ry="${3*sc}" fill="white"/>`;
+  const blush=`<ellipse cx="${cx-30*sc}" cy="${cy+8*sc}" rx="${9*sc}" ry="${5*sc}" fill="${c.bl}"/><ellipse cx="${cx+30*sc}" cy="${cy+8*sc}" rx="${9*sc}" ry="${5*sc}" fill="${c.bl}"/>`;
+  let mouth='';
+  if(mood==='stressed'){mouth=`<path d="M${cx-11*sc} ${cy-7*sc} L${cx-7*sc} ${cy-9*sc}" stroke="${c.ey}" stroke-width="${2*sc}" stroke-linecap="round" opacity=".65"/><path d="M${cx+7*sc} ${cy-9*sc} L${cx+11*sc} ${cy-7*sc}" stroke="${c.ey}" stroke-width="${2*sc}" stroke-linecap="round" opacity=".65"/><path d="M${cx-10*sc} ${cy+12*sc} Q${cx} ${cy+8*sc} ${cx+10*sc} ${cy+12*sc}" stroke="${c.ey}" stroke-width="${2.5*sc}" fill="none" stroke-linecap="round"/>`;}
+  else if(mood==='sad'||mood==='worried'||mood==='tired'){mouth=`<path d="M${cx-10*sc} ${cy+11*sc} Q${cx} ${cy+7*sc} ${cx+10*sc} ${cy+11*sc}" stroke="${c.ey}" stroke-width="${2.5*sc}" fill="none" stroke-linecap="round"/>`;}
+  else if(mood==='crying'){mouth=`<path d="M${cx-10*sc} ${cy+11*sc} Q${cx} ${cy+6*sc} ${cx+10*sc} ${cy+11*sc}" stroke="${c.ey}" stroke-width="${2.5*sc}" fill="none" stroke-linecap="round"/><ellipse cx="${eL-1*sc}" cy="${eY+11*sc}" rx="${2.2*sc}" ry="${5*sc}" fill="${c.sh}" opacity=".8"/><ellipse cx="${eR+1*sc}" cy="${eY+11*sc}" rx="${2.2*sc}" ry="${5*sc}" fill="${c.sh}" opacity=".8"/>`;}
+  else if(mood==='exhausted'){mouth=`<path d="M${cx-9*sc} ${cy+11*sc} L${cx+9*sc} ${cy+11*sc}" stroke="${c.ey}" stroke-width="${2*sc}" stroke-linecap="round" opacity=".6"/><path d="M${eL-6*sc} ${eY-8*sc} L${eL+6*sc} ${eY-8*sc}" stroke="${c.ey}" stroke-width="${1.6*sc}" stroke-linecap="round" opacity=".4"/><path d="M${eR-6*sc} ${eY-8*sc} L${eR+6*sc} ${eY-8*sc}" stroke="${c.ey}" stroke-width="${1.6*sc}" stroke-linecap="round" opacity=".4"/>`;}
+  else if(mood==='fear'){mouth=`<ellipse cx="${cx}" cy="${cy+11*sc}" rx="${5*sc}" ry="${6*sc}" fill="${c.ey}" opacity=".7"/>`;}
+  else if(mood==='glowing'||mood==='celebrating'){mouth=`<path d="M${cx-11*sc} ${cy+10*sc} Q${cx} ${cy+20*sc} ${cx+11*sc} ${cy+10*sc}" stroke="#c09020" stroke-width="${3*sc}" fill="none" stroke-linecap="round"/>`;}
+  else if(mood==='excited'){mouth=`<path d="M${cx-12*sc} ${cy+8*sc} Q${cx} ${cy+22*sc} ${cx+12*sc} ${cy+8*sc}" stroke="${c.ey}" stroke-width="${2.8*sc}" fill="none" stroke-linecap="round"/>`;}
+  else if(mood==='love'){mouth=`<path d="M${cx-9*sc} ${cy+9*sc} Q${cx} ${cy+16*sc} ${cx+9*sc} ${cy+9*sc}" stroke="${c.ey}" stroke-width="${2.5*sc}" fill="none" stroke-linecap="round" opacity=".8"/>`;}
+  else if(mood==='shy'){mouth=`<path d="M${cx-6*sc} ${cy+10*sc} Q${cx} ${cy+13*sc} ${cx+6*sc} ${cy+10*sc}" stroke="${c.ey}" stroke-width="${2*sc}" fill="none" stroke-linecap="round" opacity=".65"/>`;}
+  else if(mood==='proud'){mouth=`<path d="M${cx-11*sc} ${cy+9*sc} Q${cx} ${cy+15*sc} ${cx+11*sc} ${cy+9*sc}" stroke="${c.ey}" stroke-width="${2.5*sc}" fill="none" stroke-linecap="round" opacity=".85"/>`;}
+  else if(mood==='smug'){mouth=`<path d="M${cx-14*sc} ${cy-9*sc} Q${cx-8*sc} ${cy-12*sc} ${cx-2*sc} ${cy-9*sc}" stroke="${c.ey}" stroke-width="${1.6*sc}" stroke-linecap="round" fill="none" opacity=".55"/><path d="M${cx-10*sc} ${cy+10*sc} Q${cx+2*sc} ${cy+16*sc} ${cx+13*sc} ${cy+7*sc}" stroke="${c.ey}" stroke-width="${2.5*sc}" fill="none" stroke-linecap="round"/>`;}
+  else if(mood==='annoyed'){mouth=`<path d="M${cx-12*sc} ${cy-10*sc} L${cx-4*sc} ${cy-7*sc}" stroke="${c.ey}" stroke-width="${2.2*sc}" stroke-linecap="round"/><path d="M${cx+4*sc} ${cy-7*sc} L${cx+12*sc} ${cy-10*sc}" stroke="${c.ey}" stroke-width="${2.2*sc}" stroke-linecap="round"/><path d="M${cx-9*sc} ${cy+13*sc} L${cx+9*sc} ${cy+13*sc}" stroke="${c.ey}" stroke-width="${2.8*sc}" fill="none" stroke-linecap="round"/>`;}
+  else{const sa=mood==='happy'?16:13;mouth=`<path d="M${cx-10*sc} ${cy+10*sc} Q${cx} ${sa*sc+cy} ${cx+10*sc} ${cy+10*sc}" stroke="${c.ey}" stroke-width="${2.5*sc}" fill="none" stroke-linecap="round" opacity=".75"/>`;}
+  let rain='';
+  if(mood==='stressed'||mood==='sad'||mood==='crying'||mood==='worried'){
+    const ry2=cy+31*sc;
+    rain=`<ellipse cx="${cx-22*sc}" cy="${ry2}" rx="${2.8*sc}" ry="${6.5*sc}" fill="${c.sh}" opacity=".7"/><ellipse cx="${cx-6*sc}" cy="${ry2+5*sc}" rx="${2.8*sc}" ry="${7.5*sc}" fill="${c.sh}" opacity=".6"/><ellipse cx="${cx+10*sc}" cy="${ry2}" rx="${2.8*sc}" ry="${6.5*sc}" fill="${c.sh}" opacity=".75"/><ellipse cx="${cx+24*sc}" cy="${ry2+4*sc}" rx="${2.8*sc}" ry="${5.5*sc}" fill="${c.sh}" opacity=".5"/>`;
+  }
+  let glow='';
+  if(mood==='glowing'||mood==='celebrating'||mood==='excited'||mood==='proud'){
+    const gy=cy-39*sc;
+    glow=`<line x1="${cx}" y1="${gy}" x2="${cx}" y2="${gy-13*sc}" stroke="#f7d070" stroke-width="${3*sc}" stroke-linecap="round" opacity=".8"/><line x1="${cx-27*sc}" y1="${gy+8*sc}" x2="${cx-37*sc}" y2="${gy}" stroke="#f7d070" stroke-width="${3*sc}" stroke-linecap="round" opacity=".7"/><line x1="${cx+27*sc}" y1="${gy+8*sc}" x2="${cx+37*sc}" y2="${gy}" stroke="#f7d070" stroke-width="${3*sc}" stroke-linecap="round" opacity=".7"/>`;
+  }
+  return glow+rain+body+rim+eyes+blush+mouth;
+}
+function smCloud(m){return`<svg width="110" height="92" viewBox="0 0 110 92" xmlns="http://www.w3.org/2000/svg">${buildCloud(m,110,92,.66)}</svg>`;}
+function drawN(m){const e=document.getElementById('nSVG');if(e)e.innerHTML=buildCloud(m,200,170,1);}
+let _transRevert=null;
+function showTransientMood(mood,ms=2400){clearTimeout(_transRevert);drawN(mood);_transRevert=setTimeout(()=>drawN(S.nimbusState),ms);}
+
+// ═══ SPEECH BUBBLES ═══
+let _bubbleTO=null;
+function showBubbleIn(wrapId,text,ms=3200){const wrap=document.getElementById(wrapId);if(!wrap)return;wrap.innerHTML=`<div class="spb" id="${wrapId}_b">${text}</div>`;requestAnimationFrame(()=>{const b=document.getElementById(wrapId+'_b');if(b)b.classList.add('show');});clearTimeout(_bubbleTO);_bubbleTO=setTimeout(()=>{const b=document.getElementById(wrapId+'_b');if(b)b.classList.remove('show');},ms);}
+function showNimbusBubble(text,ms){showBubbleIn('nBubbleWrap',text,ms);}
+function showOnboardBubble(text,ms){showBubbleIn('onboardBubbleWrap',text,ms);}
+
+// ═══ ONBOARDING PERSONALITY REACTIONS ═══
+let _obAcFlag=0,_obEcFlag=0;
+function evalOnboardPersonality(stepType){
+  let msg=null,mood=null;
+  if(stepType==='cat_ac'){const cat=getCat('academic');const subs=cat?.subcats||[];const rigor=subs.filter(s=>s.type==='AP'||s.type==='IB').length;if(rigor>=4&&_obAcFlag<2){msg="Wow... you're SO smart. 🤓 Or completely unhinged. Jury's out.";mood='smug';_obAcFlag=2;}else if(rigor>=2&&_obAcFlag<1){msg="Ooh, fancy — stacking APs and IBs, huh? 😏 Nimbus is impressed (and a little scared for you).";mood='smug';_obAcFlag=1;}else if(subs.length>=7){msg="That's... a lot of classes. Nimbus needs a nap just from reading this list.";mood='sad';}}
+  else if(stepType==='cat_ec'){const ecs=S.categories.filter(c=>c.type==='ec').length;if(ecs>=5&&_obEcFlag<2){msg="What an OVERACHIEVER. Do you also sleep? Asking for a friend. 😅";mood='smug';_obEcFlag=2;}else if(ecs>=3&&_obEcFlag<1){msg="Look at you go — full extracurricular buffet. Nimbus approves. 👀";mood='happy';_obEcFlag=1;}}
+  if(msg){const sv=document.getElementById('onboardCloudSVG');if(sv)sv.innerHTML=buildCloud(mood,110,92,.66);showOnboardBubble(msg);}
+}
+
+// ═══ APP START ═══
+function recalcFromSaved(){updateNimbusState();updateBurnoutAlert();setAff();}
+function startApp(){
+  ensureDailyStats();
+  recalcFromSaved();showScrn('app');
+  ['tasks','settings','admin','leaderboard'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display='none';});
+  const adminBtn=document.getElementById('adminNavBtn');if(adminBtn)adminBtn.style.display=isAdmin()?'flex':'none';
+  const h=document.getElementById('home');if(h)h.style.display='block';
+  drawN(S.nimbusState);updNTxt();updGreet();drawTodayTasks();setAff();
+  updAllS();loadNS();buildCatDD();updSetInfo();setupNotifs();
+  const n=document.getElementById('nudge');if(n)n.classList.toggle('show',!ciDone());
+  startSection('home');_lastTab='home';
+}
+const NTXT_LINES={
+  stressed:["Nimbus is feeling stormy 🌩️","Storm clouds forming. Please, for the love of clouds, take a break.","I'm one urgent task away from thunder.","We are NOT okay right now. Fix this."],
+  sad:["Nimbus is feeling rainy 🌧️","It's drizzling in here. Metaphorically. Also maybe literally.","A little gray today. Be gentle with yourself, and with me.","Send help. Or snacks. Snacks work too."],
+  crying:["Nimbus is having a full downpour 😢","This is a lot. I'm not okay, and I don't think you are either.","Okay. Let's just breathe for a second. Together.","Please talk to someone today, even just for a minute."],
+  fear:["Nimbus is a little spooked 😨","That's a LOT of tasks and a LOT of overwhelm at once. I'm scared for you.","Uh. Everything's fine. EVERYTHING'S FINE. (It's a lot, huh.)","We need to talk about this list before it talks back."],
+  worried:["Nimbus has a furrowed brow 😟","Those urgent tasks are stressing me out and I don't even have hands.","I keep glancing at your list. I can't help it.","A little anxious over here. Let's tackle one urgent thing first?"],
+  tired:["Nimbus is running low on steam 😮‍💨","That's a big workload. Pace yourself, okay?","I'm yawning and I don't even have a mouth most of the time.","Getting a little droopy over here. You too, probably."],
+  exhausted:["Nimbus is completely wiped 🥱","This is too much. Genuinely. Please rest soon.","I've got nothing left in the tank. Have you?","Running on fumes. Same as you, I bet."],
+  neutral:["Nimbus is okay ⛅","Just vibing. Mild weather, mild mood.","Nothing to report. Suspiciously calm.","Cruising at a comfortable, unbothered altitude."],
+  shy:["Nimbus is feeling a little shy 🙈","Oh — didn't see you there. Hi.","No no, I'm fine, just... a little flustered.","Stop looking at me. (Keep looking at me.)"],
+  happy:["Nimbus is feeling sunny ☀️","Good vibes only over here.","Look at you, being all productive. Cute.","Sunny with a chance of you actually finishing something today."],
+  excited:["Nimbus can barely sit still 🤩","OKAY something good is happening and I am HERE for it!","We're buzzing. Absolutely buzzing.","I feel like doing a little cloud spin right now."],
+  love:["Nimbus has heart eyes 🥰","Okay this is sweet, I'll admit it.","You're growing on me. Like a nice moss.","Aw. Come here. (I have no arms. Emotionally, come here.)"],
+  proud:["Nimbus is SO proud of you 🏅","Look at that list. Look at it! Nothing pending. Incredible.","You did the thing. All of the things, actually.","I'm bragging about you to the other clouds right now."],
+  celebrating:["Nimbus is throwing confetti 🎉","WE DID IT. Okay YOU did it, but I'm celebrating too.","This calls for a little cloud dance.","Absolutely thriving over here."],
+  glowing:["Nimbus is glowing! 🌈","We are LOCKED IN. Absolutely radiant.","I'd hug you if I had arms. Incredible work.","Rainbow tier unlocked. This is your era."]
+};
+function updNTxt(){const pool=NTXT_LINES[S.nimbusState]||["Nimbus is here ☁️"];const e=document.getElementById('nTxt');if(e)e.textContent=pool[Math.floor(Math.random()*pool.length)];}
+function updGreet(){const e=document.getElementById('greet');if(e)e.textContent=`Hey ${S.name||'there'} ☁️`;const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];const n=new Date();const d=document.getElementById('ddate');if(d)d.textContent=`${days[n.getDay()]}, ${months[n.getMonth()]} ${n.getDate()}`;}
+function updSetInfo(){const e=document.getElementById('setUser');if(e)e.textContent=S.email||'Demo mode';const em=document.getElementById('setEmail');if(em)em.textContent=S.email||'—';const ph=document.getElementById('setPhone');if(ph)ph.textContent=S.phone||'No phone added';loadProfileEditor();}
+
+// ═══ PROFILE EDITOR ═══
+function loadProfileEditor(){document.querySelectorAll('#gradeOpts .ob').forEach(b=>{b.classList.toggle('sel',b.textContent===S.grade);});renderSetAcL();renderSetEcL();}
+function selGrSet(el){document.querySelectorAll('#gradeOpts .ob').forEach(b=>b.classList.remove('sel'));el.classList.add('sel');}
+function renderSetAcL(){const cat=getCat('academic');const el=document.getElementById('setAcL');if(!el)return;if(!cat?.subcats?.length){el.innerHTML=`<div style="font-size:13px;color:var(--tl);font-weight:600;">No classes added yet</div>`;return;}el.innerHTML=cat.subcats.map(s=>`<div class="ir"><div><div class="irt">${s.name}</div><div class="irs">${s.type||''}</div></div><button class="irm" onclick="rmSetAc('${s.id}')">×</button></div>`).join('');}
+function rmSetAc(id){const cat=getCat('academic');if(!cat)return;cat.subcats=cat.subcats.filter(s=>s.id!==id);renderSetAcL();}
+function addSetAc(){const n=document.getElementById('setAcI')?.value.trim();const t=document.getElementById('setAcT')?.value||'Regular';if(!n)return;let cat=getCat('academic')||addCT('academic');cat.subcats.push({id:'ac_'+Date.now(),name:n,type:t});document.getElementById('setAcI').value='';renderSetAcL();}
+function renderSetEcL(){const ecs=S.categories.filter(c=>c.type==='ec');const el=document.getElementById('setEcL');if(!el)return;if(!ecs.length){el.innerHTML=`<div style="font-size:13px;color:var(--tl);font-weight:600;">No activities added yet</div>`;return;}el.innerHTML=ecs.map(c=>`<div class="ir"><div><div class="irt">${c.name}</div><div class="irs">${c.ecType||''}</div></div><button class="irm" onclick="rmSetEc('${c.id}')">×</button></div>`).join('');}
+function rmSetEc(id){S.categories=S.categories.filter(c=>c.id!==id);renderSetEcL();}
+function addSetEc(){const n=document.getElementById('setEcI')?.value.trim();const t=document.getElementById('setEcT')?.value||'Other';if(!n)return;S.categories.push({id:'ec_'+Date.now(),name:n,icon:ecI(t),color:'pink',type:'ec',ecType:t,subcats:[]});document.getElementById('setEcI').value='';renderSetEcL();}
+function saveProfile(){const grBtn=document.querySelector('#gradeOpts .ob.sel');if(grBtn)S.grade=grBtn.textContent;buildCatDD();save();toast('Profile saved! ✓');}
+
+// ═══ AFFIRMATIONS ═══
+const AFFS=[{text:"The problem is not the problem. The problem is your attitude about the problem.",author:"Jack Sparrow"},{text:"I am running away from my responsibilities. And it feels good.",author:"Michael Scott"},{text:"I'm moving up and down, side to side, like a roller coaster.",author:"Daniel Ricciardo"},{text:"To finish first, first you must finish.",author:"Michael Schumacher"},{text:"Sometimes in life I'm too competitive.",author:"Kylian Mbappé"},{text:"I've missed more than 9,000 shots in my career... and that is why I succeed.",author:"Michael Jordan"},{text:"Do or do not. There is no try.",author:"Yoda"},{text:"Pressure is a privilege.",author:"Billie Jean King"},{text:"I'm not lazy. I'm on energy-saving mode.",author:"Patrick Star"},{text:"If you don't like your destiny, don't accept it, have the courage to change it the way you want it to be!",author:"Naruto"},{text:"Du bist gut genug (You are good enough)",author:"Blumengarten, KITSCHKRIEG, and Shirin David"},{text:"Go Beyond, Plus Ultra!",author:"All Might"},{text:"A warrior doesn't need a sword. Your true weapon is the absolute refusal to let the world break your will.",author:"Thors"},{text:"If you're nothing without this suit, then you shouldn't have it. Now get back out there and earn it.",author:"Tony Stark"},{text:"We have to be greater than what we suffer. Step up, or step aside.",author:"Spider-Man"},{text:"There is no point in crying over spilled milk. You just wipe it up and keep moving!",author:"Edna Mode"},{text:"It ain't about how hard you hit. It's about how hard you can get hit and keep moving forward.",author:"Rocky Balboa"},{text:"Never tell me the odds. Just fire up the engines.",author:"Han Solo"},{text:"What, like it's hard?",author:"Elle Woods"},{text:"If you want to survive, you wake up, you show up, and you out-work everyone.",author:"Miranda Priestly"},{text:"The sky's the limit? No, the sky is just the starting point. Keep climbing.",author:"Princess Tiana"},{text:"Carpe diem. Seize the day. Make your lives extraordinary. Don't waste a single second.",author:"John Keating"},{text:"It's not about how much you want it. It's about how hard you're willing to work when no one is watching.",author:"Judy Hopps"},{text:"The only thing standing between you and your goal is the work you're putting off.",author:"Harvey Specter"},{text:"I am going to get exactly what I want, and I am going to look incredible while doing it.",author:"Blair Waldorf"},{text:"I am too busy building a future to care about your opinions or your drama. Do the assignment.",author:"Paris Geller"},{text:"Stay Alive.",author:"Haymitch Abernathy"},{text:"Working hard is important, but there is something that matters even more: believing in yourself and refusing to give up.",author:"Harry Potter"},{text:"The world is hard, kid. It doesn't care about your feelings, and it definitely doesn't stop turning because you're tired. Keep swinging.",author:"Chiron"},{text:"I'm gonna keep getting better, keep getting better, and one day, everything's gonna pay off.",author:"Giannis Antetokounmpo"},{text:"But if you give up, you're going to lose 100%.",author:"Rafael Nadal"},{text:"The secret is just to work, work, work. There are no magical shortcuts to lifting trophies.",author:"Mohammed Salah"},{text:"I don't need the best glamour. I need the best work ethic. Talent without working hard is nothing.",author:"Cristiano Ronaldo"},{text:"Everything negative — pressure, challenges — is all an opportunity for me to rise.",author:"Kobe Bryant"},{text:"You got this twin!!",author:"Nimbus"},{text:"Never back down, never WHAT?",author:"Nimbus"},{text:"You da goat, keep going.",author:"Nimbus"},{text:"Bro is cooking 🔥",author:"Nimbus"},{text:"So tuff so talented.",author:"Nimbus"}];
+const BURN_AFFS=[{text:"You are more than your to-do list. Please rest.",author:"Nimbus"},{text:"Burnout is real. One thing at a time is enough.",author:"Nimbus"},{text:"Recovery is productive. Your body needs this.",author:"Nimbus"},{text:"It's okay to do less today. Seriously.",author:"Nimbus"}];
+const _affBags=new Map();
+function shuffled(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function setAff(){const lvl=getBurnoutLevel();const pool=(lvl==='critical'||lvl==='high')?BURN_AFFS:AFFS;let bag=_affBags.get(pool);if(!bag||!bag.length){bag=shuffled(pool);_affBags.set(pool,bag);}const a=bag.pop();const e=document.getElementById('affQ');if(e)e.textContent=`"${a.text}"`;const e2=document.getElementById('affA');if(e2)e2.textContent=`— ${a.author}`;}
+
+// ═══ LEADERBOARD ═══
+const LB_PTS={tasks_done:10,breaks_taken:5,notifs_acted:3};
+
+async function lbTrack(field){
+  if(!sb||!S.userId||S.userId==='demo'||S.userId.startsWith('demo-'))return;
+  const d=today();
+  try{
+    const{data,error}=await sb.from('leaderboard_scores')
+      .select('*').eq('user_id',S.userId).eq('date',d).maybeSingle();
+    const cur={tasks_done:0,breaks_taken:0,notifs_acted:0};
+    if(data&&!error)Object.assign(cur,{tasks_done:data.tasks_done||0,breaks_taken:data.breaks_taken||0,notifs_acted:data.notifs_acted||0});
+    cur[field]=(cur[field]||0)+1;
+    const total=cur.tasks_done*LB_PTS.tasks_done+cur.breaks_taken*LB_PTS.breaks_taken+cur.notifs_acted*LB_PTS.notifs_acted;
+    await sb.from('leaderboard_scores').upsert({
+      user_id:S.userId,user_name:S.name||'Anonymous',date:d,
+      tasks_done:cur.tasks_done,breaks_taken:cur.breaks_taken,notifs_acted:cur.notifs_acted,
+      total_points:total
+    },{onConflict:'user_id,date'});
+  }catch(e){console.error('lbTrack failed',e);}
+}
+
+async function loadLeaderboard(){
+  const el=document.getElementById('lbList');
+  if(!el)return;
+  if(!sb||!S.userId||S.userId==='demo'||S.userId.startsWith('demo-')){
+    el.innerHTML=`<div class="lb-empty">Sign in to see the leaderboard! ☁️<br><br><span style="font-size:13px;color:var(--tl);">Leaderboard requires a real account.</span></div>`;
+    return;
+  }
+  el.innerHTML=`<div class="lb-empty">Loading... ☁️</div>`;
+  const d=today();
+  const lbl=document.getElementById('lbDateLabel');
+  if(lbl){const n=new Date();lbl.textContent=n.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});}
+  try{
+    const{data,error}=await sb.from('leaderboard_scores')
+      .select('*').eq('date',d).order('total_points',{ascending:false}).limit(50);
+    if(error){
+      el.innerHTML=`<div style="color:#c05030;padding:20px;font-weight:700;font-size:13px;">
+        Leaderboard table not set up yet.<br><br>
+        <b>Run this SQL in your Supabase dashboard:</b>
+        <div class="lb-sql"><code>CREATE TABLE IF NOT EXISTS leaderboard_scores (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id uuid,
+  user_name text,
+  date date DEFAULT CURRENT_DATE,
+  tasks_done integer DEFAULT 0,
+  breaks_taken integer DEFAULT 0,
+  notifs_acted integer DEFAULT 0,
+  total_points integer DEFAULT 0,
+  UNIQUE(user_id, date)
+);
+ALTER TABLE leaderboard_scores ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "read_all_lb" ON leaderboard_scores
+  FOR SELECT TO authenticated USING (true);
+CREATE POLICY "insert_own_lb" ON leaderboard_scores
+  FOR INSERT TO authenticated
+  WITH CHECK (auth.uid()=user_id);
+CREATE POLICY "update_own_lb" ON leaderboard_scores
+  FOR UPDATE TO authenticated
+  USING (auth.uid()=user_id);</code></div>
+      </div>`;
+      return;
+    }
+    renderLeaderboard(data||[]);
+  }catch(e){
+    el.innerHTML=`<div class="lb-empty">Couldn't load leaderboard. Try again.</div>`;
+    console.error('loadLeaderboard failed',e);
+  }
+}
+
+const LB_MEDALS=['🥇','🥈','🥉'];
+const LB_AVATAR_COLORS=[
+  'linear-gradient(135deg,#f5b87a,#e8874a)',
+  'linear-gradient(135deg,#baaff0,#8878d0)',
+  'linear-gradient(135deg,#58b088,#388060)',
+  'linear-gradient(135deg,#5898d8,#3870b0)',
+  'linear-gradient(135deg,#c785a9,#a06080)',
+  'linear-gradient(135deg,#f7d070,#d8a030)',
+];
+
+function renderLeaderboard(rows){
+  const el=document.getElementById('lbList');if(!el)return;
+  if(!rows.length){
+    el.innerHTML=`<div class="lb-empty">No scores yet today!<br><br>Complete tasks, take breaks, and act on notifications to earn points and appear here. 🏆</div>`;
+    return;
+  }
+  let html='';
+  rows.forEach((row,i)=>{
+    const isMe=row.user_id===S.userId;
+    const rank=i<3?LB_MEDALS[i]:`${i+1}`;
+    const initial=(row.user_name||'?')[0].toUpperCase();
+    const avatarBg=LB_AVATAR_COLORS[i%LB_AVATAR_COLORS.length];
+    const meBadge=isMe?`<span class="lb-me-badge">you</span>`:'';
+    html+=`<div class="lb-card${isMe?' lb-me':''}">
+      <div class="lb-rank">${rank}</div>
+      <div class="lb-avatar" style="background:${avatarBg}">${initial}</div>
+      <div class="lb-info">
+        <div class="lb-name">${escHtml(row.user_name||'Anonymous')}${meBadge}</div>
+        <div class="lb-stats">
+          <span class="lb-stat">✅ ${row.tasks_done||0} task${(row.tasks_done||0)!==1?'s':''}</span>
+          <span class="lb-stat">🌿 ${row.breaks_taken||0} break${(row.breaks_taken||0)!==1?'s':''}</span>
+          <span class="lb-stat">🔔 ${row.notifs_acted||0} notif${(row.notifs_acted||0)!==1?'s':''}</span>
+        </div>
+      </div>
+      <div class="lb-pts-wrap">
+        <div class="lb-pts">${row.total_points||0}</div>
+        <div class="lb-pts-label">pts</div>
+      </div>
+    </div>`;
+  });
+  el.innerHTML=html;
+}
+
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ═══ TASKS ═══
+const CM={orange:{dot:'#e8874a'},mint:{dot:'#58b088'},lavender:{dot:'#8878d0'},sky:{dot:'#5898d8'},peach:{dot:'#e8a888'},pink:{dot:'#c785a9'}};
+function getCatForTask(t){if(!t.catId)return null;const f=S.categories.find(c=>c.id===t.catId||c.type===t.catId);if(f)return f;if(t.catId==='academic')return{name:'Academic',icon:'📚',color:'orange'};if(t.catId==='colprep')return{name:'College Prep',icon:'🎓',color:'lavender'};if(t.catId==='personal')return{name:'Personal',icon:'🏠',color:'peach'};return null;}
+function dotColor(t){const c=getCatForTask(t);if(!c)return'#e8a888';return CM[c.color]?.dot||'#e8a888';}
+function drawTodayTasks(){const td=S.tasks.filter(t=>isToday(t.due));const el=document.getElementById('todayList');if(!el)return;if(!td.length){el.innerHTML=`<div style="text-align:center;padding:28px 0;color:var(--tl);font-weight:700;font-size:15px;">No tasks due today! ✨</div>`;}else{td.sort((a,b)=>{const po={Urgent:0,Medium:1,Low:2,Study:3};return(po[a.priority]||1)-(po[b.priority]||1);});el.innerHTML=td.map(t=>taskHTML(t)).join('');}updateNimbusState();drawN(S.nimbusState);updNTxt();}
+function taskHTML(t){const pc={Urgent:'pu',Medium:'pm',Low:'pl2',Study:'pl2'}[t.priority]||'pm';const dot=dotColor(t);const cat=getCatForTask(t);const lbl=t.subcatName||(cat?cat.name:'')||'General';const due=t.due?fmtDue(t.due):'';return`<div class="tc${t.done?' dc':''}" onclick="openDetail(${t.id})"><div class="tsd" style="background:${dot}"></div><div class="tck${t.done?' chk':''}" onclick="event.stopPropagation();togTask(${t.id})"></div><div class="ti"><div class="tt">${t.name}</div><div class="tm2">${lbl}${t.subcatType?' ('+t.subcatType+')':''}${t.time?' · '+t.time:''}${due?' · '+due:''}</div></div>${!t.done?`<div class="pb ${pc}">${t.priority}</div>`:''}</div>`;}
+function fmtDue(s){if(s===today())return'Today';const diff=Math.round((new Date(s+'T12:00:00')-new Date())/86400000);if(diff<0)return'Overdue';if(diff===1)return'Tomorrow';return diff+' days';}
+function togTask(id){
+  const t=S.tasks.find(x=>x.id===id);if(!t)return;
+  const wasNotDone=!t.done;
+  t.done=!t.done;
+  if(wasNotDone&&t.done){lbTrack('tasks_done');ensureDailyStats();S.dailyStats.tasksDone++;toast('Nice work! ✓ Nimbus feels a little better ☁️');}
+  drawTodayTasks();drawAllTasks();save();
+}
+function drawAllTasks(){const el=document.getElementById('allTasks');if(!el)return;let ts=[...S.tasks];if(curF==='today')ts=ts.filter(t=>isToday(t.due));else if(curF==='upcoming')ts=ts.filter(t=>!isToday(t.due)&&!t.done);else if(curF==='done')ts=ts.filter(t=>t.done);const done=S.tasks.filter(t=>t.done).length;const sub=document.getElementById('taskSub');if(sub)sub.textContent=`${done} of ${S.tasks.length} complete`;if(!ts.length){el.innerHTML=`<div style="text-align:center;padding:40px 0;color:var(--tl);font-weight:700;font-size:15px;">Nothing here! ☁️</div>`;return;}const grp={};ts.forEach(t=>{const c=getCatForTask(t);const k=c?c.name:'General';if(!grp[k])grp[k]={cat:c,tasks:[]};grp[k].tasks.push(t);});let h='';for(const[n,g]of Object.entries(grp)){h+=`<div class="cgh"><span>${g.cat?.icon||'📋'}</span><span>${n}</span><div class="cgl"></div></div>`;h+=g.tasks.map(t=>taskHTML(t)).join('');}el.innerHTML=h;}
+function filterT(f,el){curF=f;document.querySelectorAll('.fc').forEach(c=>c.classList.remove('act'));el.classList.add('act');drawAllTasks();}
+function buildCatDD(){const sel=document.getElementById('tCat');if(!sel)return;const cats=[];if(S.categories.some(c=>c.type==='academic'))cats.push({id:'academic',name:'Academic',icon:'📚'});S.categories.filter(c=>c.type==='ec').forEach(c=>cats.push({id:c.id,name:c.name,icon:c.icon}));cats.push({id:'colprep',name:'College Prep',icon:'🎓'});cats.push({id:'personal',name:'Personal',icon:'🏠'});sel.innerHTML=`<option value="">Choose a category</option>`+cats.map(c=>`<option value="${c.id}">${c.icon} ${c.name}</option>`).join('');}
+function updSubcats(){const cid=document.getElementById('tCat').value;const g=document.getElementById('subG');const sel=document.getElementById('tSubcat');if(!cid){g.style.display='none';return;}let opts=[];if(cid==='academic'){const c=getCat('academic');if(c?.subcats?.length)opts=c.subcats.map(s=>({v:s.name,l:`${s.name} (${s.type})`}));}else{const c=S.categories.find(c=>c.id===cid);if(c?.subcats?.length)opts=c.subcats.map(s=>({v:s.name,l:s.name}));}if(opts.length){g.style.display='block';sel.innerHTML=`<option value="">Any</option>`+opts.map(o=>`<option value="${o.v}">${o.l}</option>`).join('');}else g.style.display='none';}
+function openDetail(id){const t=S.tasks.find(x=>x.id===id);if(!t)return;detId=id;const c=getCatForTask(t);document.getElementById('dtName').textContent=t.name;document.getElementById('dtMeta').textContent=`${c?c.name:'General'}${t.subcatName?' › '+t.subcatName:''}  ·  ${t.time||''}  ·  Due: ${t.due||'Not set'}  ·  ${t.priority}`;const timerBtn=document.getElementById('dtTimerBtn');if(timerBtn)timerBtn.style.display=t.done?'none':'block';const completeBtn=document.getElementById('dtCompleteBtn');if(completeBtn)completeBtn.textContent=t.done?'↺ Mark Incomplete':'✓ Mark Complete';openM('taskDetail');}
+function launchTimer(){closeM('taskDetail');const t=S.tasks.find(x=>x.id===detId);if(t)openTimer(t);}
+function doneDetail(){togTask(detId);closeM('taskDetail');}
+function delTask(){S.tasks=S.tasks.filter(x=>x.id!==detId);closeM('taskDetail');drawTodayTasks();drawAllTasks();toast('Task deleted');save();}
+function openAddTask(){document.getElementById('tName2').value='';document.getElementById('tDue').value=today();document.querySelectorAll('#timeOpts .ob,#priOpts .ob').forEach(b=>b.classList.remove('sel'));document.getElementById('subG').style.display='none';buildCatDD();openM('addTaskModal');}
+function openEdit(){const t=S.tasks.find(x=>x.id===detId);if(!t)return;closeM('taskDetail');document.getElementById('eName').value=t.name;document.getElementById('eDue').value=t.due||'';document.querySelectorAll('#eTimeOpts .ob').forEach(b=>b.classList.toggle('sel',b.textContent===t.time));document.querySelectorAll('#ePriOpts .ob').forEach(b=>b.classList.toggle('sel',b.textContent.replace(/[🔴🟠🟢📚]\s*/,'')===t.priority));openM('editModal');}
+function saveEdit(){const t=S.tasks.find(x=>x.id===detId);if(!t)return;t.name=document.getElementById('eName').value.trim()||t.name;t.due=document.getElementById('eDue').value||t.due;const te=document.querySelector('#eTimeOpts .ob.sel');const pe=document.querySelector('#ePriOpts .ob.sel');if(te)t.time=te.textContent;if(pe)t.priority=pe.textContent.replace(/[🔴🟠🟢📚]\s*/,'');closeM('editModal');drawTodayTasks();drawAllTasks();toast('Task updated! ✓');save();}
+function addTask(){const name=document.getElementById('tName2').value.trim();if(!name){toast('Please enter a task name!');return;}const catId=document.getElementById('tCat').value;const scEl=document.getElementById('tSubcat');const sn=scEl?.value||'';let st='';if(catId==='academic'){const c=getCat('academic');const s=c?.subcats.find(x=>x.name===sn);if(s)st=s.type;}const t={id:Date.now(),name,catId:catId||'general',subcatName:sn,subcatType:st,time:(document.querySelector('#timeOpts .ob.sel')||{textContent:'30 min'}).textContent,priority:((document.querySelector('#priOpts .ob.sel')||{textContent:'Medium'}).textContent).replace(/[🔴🟠🟢📚]\s*/,''),due:document.getElementById('tDue').value||today(),done:false};S.tasks.push(t);closeM('addTaskModal');drawTodayTasks();drawAllTasks();toast('Task added! ✓');save();}
+function selO(el,gid){document.querySelectorAll(`#${gid} .ob`).forEach(b=>b.classList.remove('sel'));el.classList.add('sel');}
+
+// ═══ TIMER ═══
+function openTimer(task){const tm={'15 min':900,'30 min':1800,'45 min':2700,'1 hr':3600,'1.5 hr':5400,'2+ hr':7200};TMR.total=tm[task.time]||1800;TMR.rem=TMR.total;TMR.phase='focus';TMR.name=task.name;TMR.taskId=task.id;TMR.active=false;TMR.bc=0;clearInterval(TMR.iv);document.getElementById('tName').textContent=task.name;document.getElementById('tPhase').textContent='Focus Session';document.getElementById('tPlay').textContent='▶';document.getElementById('bSug').classList.remove('show');updTDisp();showScrn('timer');startSection('focusing');_lastTab='focusing';}
+function closeTimer(){clearInterval(TMR.iv);TMR.active=false;endSection();showScrn('app');startSection('home');_lastTab='home';}
+function toggleTimer(){if(TMR.active){clearInterval(TMR.iv);TMR.active=false;document.getElementById('tPlay').textContent='▶';}else{TMR.active=true;document.getElementById('tPlay').textContent='⏸';TMR.iv=setInterval(tickT,1000);}}
+function tickT(){if(TMR.rem<=0){clearInterval(TMR.iv);TMR.active=false;document.getElementById('tPlay').textContent='▶';if(TMR.phase==='focus'){TMR.bc++;document.getElementById('bSug').classList.add('show');toast('Focus done! Take a break 🌿');sndNotif('Break time! ☁️',pickBreakMsg(),{type:'break',taskId:TMR.taskId,tag:'nimbus-break'});}else{document.getElementById('bSug').classList.remove('show');document.getElementById('tPhase').textContent='Focus Session';TMR.phase='focus';TMR.rem=TMR.total;updTDisp();toast('Break done! Back to focus, feeling refreshed ⏱☁️');updateNimbusState();drawN(S.nimbusState);updNTxt();startSection('focusing');_lastTab='focusing';}return;}TMR.rem--;updTDisp();}
+function updTDisp(){const m=Math.floor(TMR.rem/60),s=TMR.rem%60;document.getElementById('tDisp').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;const pct=1-(TMR.rem/TMR.total);document.getElementById('tProg').style.strokeDashoffset=691*(1-pct);document.getElementById('tProg').style.stroke=TMR.phase==='break'?'#58b088':pct>.8?'#f7d070':'#f5a96a';}
+function startBreak(min){
+  document.getElementById('bSug').classList.remove('show');
+  TMR.phase='break';TMR.rem=min*60;TMR.total=min*60;
+  document.getElementById('tPhase').textContent=`${min} min Break`;
+  updTDisp();TMR.active=true;document.getElementById('tPlay').textContent='⏸';
+  TMR.iv=setInterval(tickT,1000);
+  toast(`${min} min break started 🌿 Nimbus already feels a little lighter.`);
+  startSection('break');_lastTab='break';
+  lbTrack('breaks_taken');
+  ensureDailyStats();S.dailyStats.breaks++;
+  updateNimbusState();drawN(S.nimbusState);updNTxt();
+  save();
+}
+function resetTimer(){clearInterval(TMR.iv);TMR.active=false;TMR.rem=TMR.total;TMR.phase='focus';document.getElementById('tPlay').textContent='▶';document.getElementById('bSug').classList.remove('show');document.getElementById('tPhase').textContent='Focus Session';updTDisp();}
+function offerBreak(){clearInterval(TMR.iv);TMR.active=false;document.getElementById('tPlay').textContent='▶';document.getElementById('bSug').classList.add('show');}
+
+// ═══ CHECK-IN ═══
+function openCI(){document.getElementById('wlS').value=S.workload;document.getElementById('owS').value=S.overwhelm;document.getElementById('wlV').textContent=S.workload;document.getElementById('owV').textContent=S.overwhelm;updAllS();selMood(S.mood);const d=document.getElementById('ciDate');if(d)d.textContent=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});openM('ciModal');}
+function selMood(i){selM=i;document.querySelectorAll('#moodRow .moo').forEach((el,j)=>el.classList.toggle('sel',j===i));}
+function submitCI(){S.mood=selM;S.workload=parseInt(document.getElementById('wlS').value);S.overwhelm=parseInt(document.getElementById('owS').value);S.lastCI=today();S.burnoutHistory=S.burnoutHistory||[];S.burnoutHistory.push({date:today(),overwhelm:S.overwhelm,workload:S.workload});if(S.burnoutHistory.length>30)S.burnoutHistory=S.burnoutHistory.slice(-30);updateNimbusState();drawN(S.nimbusState);updNTxt();const n=document.getElementById('nudge');if(n)n.classList.remove('show');closeM('ciModal');toast('Nimbus updated! ☁️');updateBurnoutAlert();setAff();setupNotifs();save();}
+
+// ═══ NOTIFICATIONS ═══
+function requestNotifPermission(){
+  if(!('Notification'in window)){toast('Notifications not supported on this browser.');return;}
+  Notification.requestPermission().then(p=>{
+    if(p==='granted'){startNI();toast('Notifications enabled! ☁️');}
+    else if(p==='denied')toast('Blocked. Enable in phone Settings → Nimbus → Notifications.');
+    else toast('Permission dismissed — tap Allow again to enable.');
+  });
+}
+function loadNS(){const n=S.notifs||{};const nb=document.getElementById('nBreak');if(nb){nb.checked=!!n.break;document.getElementById('bfRow').style.display=n.break?'flex':'none';}const nt=document.getElementById('nTasks');if(nt)nt.checked=!!n.tasks;const nc=document.getElementById('nCI');if(nc){nc.checked=!!n.checkin;document.getElementById('ciTRow').style.display=n.checkin?'flex':'none';}const bf=document.getElementById('bFreq');if(bf)bf.value=n.breakFreq||60;const ct=document.getElementById('ciTime');if(ct)ct.value=n.checkinTime||'08:00';}
+function saveN(){S.notifs={break:document.getElementById('nBreak')?.checked||false,breakFreq:parseInt(document.getElementById('bFreq')?.value||60),tasks:document.getElementById('nTasks')?.checked||false,checkin:document.getElementById('nCI')?.checked||false,checkinTime:document.getElementById('ciTime')?.value||'08:00'};document.getElementById('bfRow').style.display=S.notifs.break?'flex':'none';document.getElementById('ciTRow').style.display=S.notifs.checkin?'flex':'none';setupNotifs();save();}
+function setupNotifs(){
+  stopNI();
+  const hasAny=S.notifs&&(S.notifs.break||S.notifs.tasks||S.notifs.checkin);
+  if(!hasAny)return;
+  if(!('Notification'in window)){toast('Notifications not supported.');return;}
+  if(Notification.permission==='denied'){toast('Notifications blocked. Enable in Settings → Nimbus.');return;}
+  if(Notification.permission==='default')return;
+  startNI();
+}
+function startNI(){
+  if(S.notifs.break){const mins=getAdaptiveBreakMins();NI.push(setInterval(()=>sndNotif('☁️ Time for a break!',pickBreakMsg(),{type:'break',taskId:TMR.taskId,tag:'nimbus-break'}),mins*60*1000));}
+  if(S.notifs.tasks){
+    const chk=()=>{const due=S.tasks.filter(t=>!t.done&&isToday(t.due));if(!due.length)return;const urgent=due.filter(t=>t.priority==='Urgent');const show=urgent.length?urgent:due;sndNotif(`📋 ${due.length} task${due.length>1?'s':''} due today`,pickTaskMsg(due)+' — '+show.slice(0,2).map(t=>t.name).join(', '),{type:'task',id:show[0].id,tag:'nimbus-task'});};
+    setTimeout(chk,3000);NI.push(setInterval(chk,3600000));
+  }
+  if(S.notifs.checkin)schedCI();
+}
+function schedCI(){const[h,mi]=(S.notifs.checkinTime||'08:00').split(':').map(Number);const now=new Date(),t=new Date();t.setHours(h,mi,0,0);if(t<=now)t.setDate(t.getDate()+1);const id=setTimeout(()=>{if(!ciDone())sndNotif('☁️ Daily Check-In',pickCIMsg(),{type:'checkin',tag:'nimbus-checkin'});NI.push(setInterval(()=>{if(!ciDone())sndNotif('☁️ Daily Check-In',pickCIMsg(),{type:'checkin',tag:'nimbus-checkin'});},86400000));},t-now);NI.push(id);}
+function sndNotif(title,body,data={}){
+  if(Notification.permission!=='granted')return;
+  const tag=data.tag||title;
+  if(window._swReg&&window._swReg.showNotification){
+    window._swReg.showNotification(title,{body,icon:'',badge:'',tag,renotify:true,requireInteraction:false,data});
+  }else{
+    const n=new Notification(title,{body,data});
+    n.onclick=()=>{window.focus();routeNotifOpen(data.type,data.id);};
+  }
+}
+function stopNI(){NI.forEach(id=>{clearInterval(id);clearTimeout(id);});NI=[];}
+
+// ═══ NOTIFICATION COPY ═══
+function pickBreakMsg(){const lvl=getBurnoutLevel();const pools={critical:["Please. Take a break right now — I'm genuinely worried about you. 💙","If you don't rest soon, I might actually cry. Please stop for a minute.","This one's urgent: step away. For me?"],high:["Take a break now and we can be happy together! 🌿","I really think you need this one. Please don't skip it.","Five minutes of rest — I'll wait right here for you."],default:["Time for a breather ☁️","Stretch, hydrate, look at something that isn't a screen for a sec.","Quick break? I promise I'll still be here when you're back.","Step away for a bit — your brain will thank you."]};const p=(lvl==='critical')?pools.critical:(lvl==='high'?pools.high:pools.default);return p[Math.floor(Math.random()*p.length)];}
+function pickTaskMsg(due){const urgent=due.filter(t=>t.priority==='Urgent').length;const pools=urgent?["Please finish this one today... or I will be so disappointed. 😔","This one's urgent. I believe in you, but I'm also a little stressed about it.","Urgent task alert — let's not let this slide, okay? I'm counting on you."]:["You've still got tasks waiting today. No pressure. Okay, a little pressure.","A gentle nudge: today's list isn't done yet.","Don't forget about today! I'll be quietly disappointed if we skip it."];return pools[Math.floor(Math.random()*pools.length)];}
+function pickCIMsg(){const pools=["How are you feeling today? I genuinely want to know. ☁️","Daily check-in time — let's see how you're doing.","I track the weather. You check in with me. Fair trade, right?","Tap in for a second — Nimbus is asking nicely."];return pools[Math.floor(Math.random()*pools.length)];}
+
+// ═══ NOTIFICATION CLICK ROUTING ═══
+function routeNotifOpen(type,id){
+  if(!type)return;
+  lbTrack('notifs_acted');
+  const go=()=>{
+    if(type==='task'){const t=S.tasks.find(x=>String(x.id)===String(id));swTab('home',document.querySelector('.nb')||document.querySelector('.nb.act'));document.querySelectorAll('.nb').forEach(b=>b.classList.remove('act'));const homeBtn=document.querySelector('.nb');if(homeBtn)homeBtn.classList.add('act');if(t)openDetail(t.id);}
+    else if(type==='break'){openBreakScreen();}
+    else if(type==='checkin'){swTab('home',document.querySelector('.nb'));document.querySelectorAll('.nb').forEach(b=>b.classList.remove('act'));const homeBtn=document.querySelector('.nb');if(homeBtn)homeBtn.classList.add('act');openCI();}
+  };
+  if(document.getElementById('app').classList.contains('active')||document.getElementById('timer').classList.contains('active')){go();}
+  else{const iv=setInterval(()=>{if(document.getElementById('app').classList.contains('active')){clearInterval(iv);go();}},300);setTimeout(()=>clearInterval(iv),15000);}
+}
+function openBreakScreen(){
+  const t=TMR.taskId?S.tasks.find(x=>x.id===TMR.taskId):null;
+  if(t){openTimer(t);}
+  else{clearInterval(TMR.iv);TMR.active=false;document.getElementById('tName').textContent='Break Time 🌿';document.getElementById('tPhase').textContent='Choose your break';document.getElementById('tPlay').textContent='▶';showScrn('timer');startSection('break');_lastTab='break';}
+  document.getElementById('bSug').classList.add('show');
+}
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.nimbusNotifClick)routeNotifOpen(e.data.data?.type,e.data.data?.id);});
+}
+
+// ═══ NIMBUS CLICK ═══
+const CLICK_NORMAL=["You've got this! ☁️","One task at a time. You're doing great!!","Nimbus believes in you! 🌤️","You're as swift as a coursing river 💪","Focus up! Nimbus is cheering for you!","Bro is cooking 🔥","You da goat 🐐","Nimbus thinks you're slaying 💅","Never back down, never WHAT?","So tuff so talented","Poke me again, I dare you. (Affectionately.)"];
+const CLICK_HYPE=["WE ARE SO BACK 🌈","You're basically unstoppable right now, ngl","Glowing. Literally. Look at me.","Okay but you're actually eating today","10/10, no notes, keep going gng ✨","Nah I'm feeling hella aura"];
+const CLICK_CONCERNED=["Hey you doing okay? I'm a bit worried about you.","Bro slow down and take a break","Let's take a break- how about we watch an episode of a show together?","You should take a break trust your brain will be better","Let's take a walk for like 10 minutes","Bro I think it's time we touch some grass"];
+const CLICK_CARE_INSISTENT=["I really think you need a break, not another poke.","Hey. I mean it. Let's slow down together.","You've been carrying a lot. Poking me won't lighten that.","I'm serious — can we do something kind for you instead?","This isn't me being distant, I'm just worried.","You haven't taken a break or checked off a task in a while. I noticed."];
+const CLICK_CARE_FIRM=["Please. Go rest. I'll still be here. 💙","I'm not upset, I'm just really worried about you right now.","Let's stop for today. You've done enough.","I need you to take care of yourself, okay? For real.","This isn't a joke anymore — please take a break.","I'd rather see you rested than see you click me again."];
+const CLICK_LOVE=["Aww, you really do like me! 🥰","Okay that's sweet, I'll allow it.","We're bonding. This is bonding.","You're growing on me. Like a nice moss.","I felt that one right in the vapor. 💕","Okay I take back everything mean I've ever said."];
+const CLICK_EXCITED=["WOOO okay I'm into this energy! 🤩","We are BUILDING something here!","Keep going, this is thrilling!","I am WIDE awake now, let's gooo!","Excitement levels: cumulonimbus.","Okay THIS is the era I signed up for."];
+const CLICK_SARCASTIC=["Oh, we're doing this again? Okay.","Wow, riveting. Poke me a fourth time, really keeps the plot moving.","Bro don't you have tasks to get to?","Well, well, well, if it isn't someone procrastinating their tasks","Statistically, poking me has never finished a single assignment. Just saying.","Honestly, you've never been more productive in your life!"];
+const CLICK_ANNOYED=["Okay but WHY do you keep doing that.","I have feelings, you know. Allegedly.","Personal space. I'm a cloud, but still.","We've been over this. Poking ≠ productivity.","I'm starting to feel a little used, not gonna lie."];
+const CLICK_ANNOYED_EXTREME=["I am ONE more poke away from raining on you. On purpose.","Okay. That's it. Silent treatment. 🌩️","Go. Do a task. I'm serious. I'm not clicking back.","You've unlocked: Nimbus is Done With You™","🌩️🌩️🌩️ (this is a warning)","One of these days you will be caught in a heavy storm I'll make sure of it",""];
+let _clickCount=0,_clickResetTO=null;
+function nimClick(){
+  clearTimeout(_clickResetTO);_clickCount++;_clickResetTO=setTimeout(()=>{_clickCount=0;},18000);
+  ensureDailyStats();
+  const lvl=getBurnoutLevel();
+  const highBurnout=lvl==='critical'||lvl==='high';
+  const lowEngagement=S.dailyStats.breaks===0&&S.dailyStats.tasksDone===0;
+  const needsCare=highBurnout||lowEngagement;
+  let pool,mood,shakeMs=2200,gentle=false;
+  if(needsCare){
+    gentle=true;
+    const careMood=lvl==='critical'?'crying':(highBurnout?'sad':'tired');
+    if(_clickCount>=7){pool=CLICK_CARE_FIRM;mood=careMood;shakeMs=2800;}
+    else if(_clickCount>=4){pool=CLICK_CARE_INSISTENT;mood=careMood;shakeMs=2500;}
+    else{pool=CLICK_CONCERNED;mood=careMood;}
+  }else{
+    if(_clickCount>=11){pool=CLICK_ANNOYED_EXTREME;mood='annoyed';shakeMs=3400;}
+    else if(_clickCount>=9){pool=CLICK_ANNOYED;mood='annoyed';shakeMs=3000;}
+    else if(_clickCount>=7){pool=CLICK_SARCASTIC;mood='smug';shakeMs=2600;}
+    else if(_clickCount>=5){pool=CLICK_EXCITED;mood='excited';shakeMs=2400;}
+    else if(_clickCount>=3){pool=CLICK_LOVE;mood='love';shakeMs=2400;}
+    else if(lvl==='minimal'){pool=CLICK_HYPE;mood='glowing';}
+    else{pool=CLICK_NORMAL;mood=null;}
+  }
+  const msg=pool[Math.floor(Math.random()*pool.length)];
+  showNimbusBubble(msg,shakeMs+400);
+  if(mood)showTransientMood(mood,shakeMs);
+  const w=document.getElementById('nWrap');
+  if(w){w.style.transform=gentle?'scale(.97)':(_clickCount>=9?'scale(.94) rotate(3deg)':'scale(1.1) rotate(-4deg)');setTimeout(()=>w.style.transform='scale(1)',300);}
+}
+
+// ═══ NAVIGATION ═══
+function swTab(tab,el){
+  ['home','tasks','settings','admin','leaderboard'].forEach(id=>{const s=document.getElementById(id);if(s)s.style.display='none';});
+  const t=document.getElementById(tab);if(t)t.style.display='block';
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('act'));
+  if(el)el.classList.add('act');
+  startSection(tab);_lastTab=tab;
+  if(tab==='home')setAff();
+  if(tab==='tasks'){buildCatDD();drawAllTasks();}
+  if(tab==='settings'){loadNS();updSetInfo();}
+  if(tab==='admin')loadAdminLogs();
+  if(tab==='leaderboard')loadLeaderboard();
+}
+
+// ═══ MODALS + TOAST + SLIDERS ═══
+function openM(id){document.getElementById(id).classList.add('show');}
+function closeM(id){document.getElementById(id).classList.remove('show');}
+function closeMO(e,id){if(e.target===document.getElementById(id))closeM(id);}
+let _tt=null;
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('show'),2800);}
+function updS(input,valId){const pct=((input.value-input.min)/(input.max-input.min))*100;input.style.setProperty('--pct',pct+'%');if(valId){const e=document.getElementById(valId);if(e)e.textContent=input.value;}}
+function updAllS(){document.querySelectorAll('input[type=range]').forEach(s=>{const pct=((s.value-s.min)/(s.max-s.min))*100;s.style.setProperty('--pct',pct+'%');});}
+
+// ═══ SAVE / LOAD ═══
+async function save(){saveLocal();if(!sb||!S.userId||S.userId==='demo'||S.userId.startsWith('demo-'))return;try{const payload={tasks:S.tasks,categories:S.categories,mood:S.mood,workload:S.workload,overwhelm:S.overwhelm,nimbusState:S.nimbusState,name:S.name,phone:S.phone,grade:S.grade,notifs:S.notifs,lastCI:S.lastCI,burnoutHistory:S.burnoutHistory||[]};const{error}=await sb.from('user_data').upsert({user_id:S.userId,data:payload,updated_at:new Date().toISOString()},{onConflict:'user_id'});if(error){console.error('SAVE ERROR:',error.message);toast('⚠️ Cloud sync failed — saved on this device only');}else console.log('✅ Saved');}catch(e){console.error('SAVE EX',e);toast('⚠️ Cloud sync failed — saved on this device only');}}
+function saveLocal(){try{localStorage.setItem('nimbus_v5',JSON.stringify(S));}catch(e){}}
+function loadLocal(){try{const s=localStorage.getItem('nimbus_v5');if(!s)return false;const p=JSON.parse(s);const isDemo=id=>!id||id==='demo'||(typeof id==='string'&&id.startsWith('demo-'));const sameId=isDemo(S.userId)||isDemo(p.userId)||p.userId===S.userId;const sameEmail=S.email&&p.email&&S.email.toLowerCase()===p.email.toLowerCase();if(!sameId&&!sameEmail)return false;const uid=S.userId,em=S.email;Object.assign(S,p);if(uid)S.userId=uid;if(em)S.email=em;if(!S.notifs)S.notifs={break:false,breakFreq:60,tasks:false,checkin:false,checkinTime:'08:00'};if(!Array.isArray(S.tasks))S.tasks=[];if(!Array.isArray(S.categories))S.categories=[];if(!S.burnoutHistory)S.burnoutHistory=[];if(!S.dailyStats)S.dailyStats={date:'',breaks:0,tasksDone:0};return true;}catch(e){return false;}}
+async function loadCloud(){if(!sb||!S.userId||S.userId==='demo'||S.userId.startsWith('demo-'))return;try{const{data,error}=await sb.from('user_data').select('data').eq('user_id',S.userId).single();if(error){if(error.code!=='PGRST116'){console.error('loadCloud ERROR:',error.message);toast('⚠️ Could not load cloud data');}else console.log('loadCloud: no cloud row yet');return;}if(!data?.data){console.log('No cloud data yet');return;}const d=data.data;console.log('✅ Loaded — name:'+d.name);const uid=S.userId,em=S.email;if(Array.isArray(d.tasks))S.tasks=d.tasks;if(Array.isArray(d.categories))S.categories=d.categories;if(d.mood!=null)S.mood=d.mood;if(d.workload!=null)S.workload=d.workload;if(d.overwhelm!=null)S.overwhelm=d.overwhelm;if(d.nimbusState)S.nimbusState=d.nimbusState;if(d.name)S.name=d.name;if(d.phone!=null)S.phone=d.phone;if(d.grade!=null)S.grade=d.grade;if(d.notifs)S.notifs=d.notifs;if(d.lastCI!=null)S.lastCI=d.lastCI;if(Array.isArray(d.burnoutHistory))S.burnoutHistory=d.burnoutHistory;S.userId=uid;S.email=em;saveLocal();}catch(e){console.error('LOAD EX',e);}}
+
+// ═══ BOOT ═══
+function checkBootNotifRoute(){
+  try{const qs=new URLSearchParams(location.search);const type=qs.get('open');const id=qs.get('id');if(type){routeNotifOpen(type,id);history.replaceState({},'',location.pathname);}}catch(e){}
+}
+window.addEventListener('DOMContentLoaded',async()=>{
+  const lc=document.getElementById('lcloud');if(lc)lc.innerHTML=buildCloud('neutral',110,92,.66);
+  renderAuth('login');
+  if(!sb){if(loadLocal()&&S.name&&S.userId){startApp();checkBootNotifRoute();}else{hideLoad();showScrn('auth');}return;}
+  try{
+    const{data:{session}}=await sb.auth.getSession();
+    if(session){S.userId=session.user.id;S.email=session.user.email;showLoad();await loadCloud();if(!S.name)loadLocal();hideLoad();if(!S.name||S.name.trim()===''){startOnboard();return;}startApp();checkBootNotifRoute();return;}
+    if(loadLocal()&&S.name&&S.userId&&S.userId.startsWith('demo')){startApp();checkBootNotifRoute();}
+    else{hideLoad();showScrn('auth');}
+  }catch(e){console.error('Boot error:',e);hideLoad();showScrn('auth');}
+});
+</script>
+</body>
+</html>
