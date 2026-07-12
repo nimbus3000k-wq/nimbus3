@@ -750,12 +750,19 @@ const CLICK_CARE_INSISTENT=["I really think you need a break, not another poke."
 const CLICK_CARE_FIRM=["Please. Go rest. I'll still be here. 💙","I'm not upset, I'm just really worried about you right now.","Let's stop for today. You've done enough.","I need you to take care of yourself, okay? For real.","This isn't a joke anymore — please take a break.","I'd rather see you rested than see you click me again."];
 const CLICK_LOVE=["Aww, you really do like me! 🥰","Okay that's sweet, I'll allow it.","We're bonding. This is bonding.","You're growing on me. Like a nice moss.","I felt that one right in the vapor. 💕","Okay I take back everything mean I've ever said."];
 const CLICK_EXCITED=["WOOO okay I'm into this energy! 🤩","We are BUILDING something here!","Keep going, this is thrilling!","I am WIDE awake now, let's gooo!","Excitement levels: cumulonimbus.","Okay THIS is the era I signed up for."];
+const CLICK_AMUSED=["Okay you really like doing that, huh? 😄","Ha — cute. Keep going, I guess.","Someone's got extra energy today.","I see you. I see exactly what you're doing.","You're testing my patience in the funniest way.","Alright, alright, I'm mildly entertained."];
 const CLICK_SARCASTIC=["Oh, we're doing this again? Okay.","Wow, riveting. Poke me a fourth time, really keeps the plot moving.","Bro don't you have tasks to get to?","Well, well, well, if it isn't someone procrastinating their tasks","Statistically, poking me has never finished a single assignment. Just saying.","Honestly, you've never been more productive in your life!"];
 const CLICK_ANNOYED=["Okay but WHY do you keep doing that.","I have feelings, you know. Allegedly.","Personal space. I'm a cloud, but still.","We've been over this. Poking ≠ productivity.","I'm starting to feel a little used, not gonna lie."];
 const CLICK_ANNOYED_EXTREME=["I am ONE more poke away from raining on you. On purpose.","Okay. That's it. Silent treatment. 🌩️","Go. Do a task. I'm serious. I'm not clicking back.","You've unlocked: Nimbus is Done With You™","🌩️🌩️🌩️ (this is a warning)","One of these days you will be caught in a heavy storm I'll make sure of it",""];
-let _clickCount=0,_clickResetTO=null;
+let _clickCount=0,_clickDecayTO=null;
+function scheduleClickDecay(){
+  clearTimeout(_clickDecayTO);
+  if(_clickCount<=0)return;
+  _clickDecayTO=setTimeout(()=>{_clickCount=Math.max(0,_clickCount-2);if(_clickCount>0)scheduleClickDecay();},3500);
+}
 function nimClick(){
-  clearTimeout(_clickResetTO);_clickCount++;_clickResetTO=setTimeout(()=>{_clickCount=0;},18000);
+  _clickCount++;
+  scheduleClickDecay();
   ensureDailyStats();
   const lvl=getBurnoutLevel();
   const highBurnout=lvl==='critical'||lvl==='high';
@@ -765,15 +772,17 @@ function nimClick(){
   if(needsCare){
     gentle=true;
     const careMood=lvl==='critical'?'crying':(highBurnout?'sad':'tired');
-    if(_clickCount>=7){pool=CLICK_CARE_FIRM;mood=careMood;shakeMs=2800;}
-    else if(_clickCount>=4){pool=CLICK_CARE_INSISTENT;mood=careMood;shakeMs=2500;}
+    if(_clickCount>=11){pool=CLICK_CARE_FIRM;mood=careMood;shakeMs=2800;}
+    else if(_clickCount>=6){pool=CLICK_CARE_INSISTENT;mood=careMood;shakeMs=2500;}
     else{pool=CLICK_CONCERNED;mood=careMood;}
   }else{
-    if(_clickCount>=11){pool=CLICK_ANNOYED_EXTREME;mood='annoyed';shakeMs=3400;}
-    else if(_clickCount>=9){pool=CLICK_ANNOYED;mood='annoyed';shakeMs=3000;}
-    else if(_clickCount>=7){pool=CLICK_SARCASTIC;mood='smug';shakeMs=2600;}
-    else if(_clickCount>=5){pool=CLICK_EXCITED;mood='excited';shakeMs=2400;}
-    else if(_clickCount>=3){pool=CLICK_LOVE;mood='love';shakeMs=2400;}
+    // A long, gradual climb — happy → love → excited → amused → sarcastic → annoyed → truly angry.
+    if(_clickCount>=25){pool=CLICK_ANNOYED_EXTREME;mood='annoyed';shakeMs=3400;}
+    else if(_clickCount>=20){pool=CLICK_ANNOYED;mood='annoyed';shakeMs=3000;}
+    else if(_clickCount>=16){pool=CLICK_SARCASTIC;mood='smug';shakeMs=2700;}
+    else if(_clickCount>=12){pool=CLICK_AMUSED;mood='smug';shakeMs=2400;}
+    else if(_clickCount>=8){pool=CLICK_EXCITED;mood='excited';shakeMs=2300;}
+    else if(_clickCount>=4){pool=CLICK_LOVE;mood='love';shakeMs=2200;}
     else if(lvl==='minimal'){pool=CLICK_HYPE;mood='glowing';}
     else{pool=CLICK_NORMAL;mood=null;}
   }
@@ -781,7 +790,7 @@ function nimClick(){
   showNimbusBubble(msg,shakeMs+400);
   if(mood)showTransientMood(mood,shakeMs);
   const w=document.getElementById('nWrap');
-  if(w){w.style.transform=gentle?'scale(.97)':(_clickCount>=9?'scale(.94) rotate(3deg)':'scale(1.1) rotate(-4deg)');setTimeout(()=>w.style.transform='scale(1)',300);}
+  if(w){w.style.transform=gentle?'scale(.97)':(_clickCount>=20?'scale(.94) rotate(3deg)':'scale(1.1) rotate(-4deg)');setTimeout(()=>w.style.transform='scale(1)',300);}
 }
 
 // ═══ NAVIGATION ═══
