@@ -413,6 +413,7 @@ let _lastAppTab='home'; // tracks the actual visible app tab (home/tasks/setting
 // ═══════════════════════════════════════════
 let S={userId:null,email:'',phone:'',name:'',grade:'',categories:[],tasks:[],mood:2,workload:5,overwhelm:5,nimbusState:'neutral',goal:'',notifs:{break:false,breakFreq:60,tasks:false,checkin:false,checkinTime:'08:00',escalate:true,tzOffsetMinutes:new Date().getTimezoneOffset()},lastCI:null,burnoutHistory:[],onboardStress:null,custom:{color:'default',accessory:'none',bgTheme:'default'},lastBreakAt:null,onboardingComplete:false,tourSeen:false};
 let TMR={active:false,iv:null,rem:1500,total:1500,focusTotal:1500,pausedRemainingMs:1500000,focusRemainingMs:1500000,endTime:null,phase:'focus',taskId:null,name:'',bc:0,autoBreaksShown:0,autoBreakTimes:[],firedCheckpoints:null};
+let NI=[], curF='all', detId=null, selM=2, _re=null;
 function today(){const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 function isToday(s){return s===today();}
 function ciDone(){return S.lastCI===today();}
