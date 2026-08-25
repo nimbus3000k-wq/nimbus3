@@ -1,8 +1,8 @@
-self.addEventListener('install', e => self.skipWaiting());
+﻿self.addEventListener('install', e => self.skipWaiting());
 self.addEventListener('activate', e => e.waitUntil(clients.claim()));
 
 self.addEventListener('push', e => {
-  const d = e.data ? e.data.json() : { title: 'Nimbus ☁️', body: 'Hey!' };
+  const d = e.data ? e.data.json() : { title: 'Nimbus â˜ï¸', body: 'Hey!' };
   e.waitUntil(self.registration.showNotification(d.title || 'Nimbus', {
     body: d.body || '',
     icon: d.icon || '',
@@ -29,3 +29,4 @@ self.addEventListener('notificationclick', e => {
     if (clients.openWindow) return clients.openWindow(target);
   }));
 });
+

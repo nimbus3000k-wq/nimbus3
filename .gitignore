@@ -1,0 +1,10 @@
+﻿node_modules/
+.wrangler/
+*.log
+_livescript.js
+_check.js
+_realscript.js
+_extracted_script.js
+live.html
+checkBalance.js
+package-lock.json
