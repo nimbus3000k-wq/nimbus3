@@ -884,6 +884,11 @@ function resetTimer(){
   document.getElementById('tPlay').textContent='▶';document.getElementById('tSkip').style.display='none';document.getElementById('bSug').classList.remove('show');document.getElementById('tPhase').textContent='Focus Session';
   updTDispFromRem(TMR.focusTotal);
 }
+function syncFocusSnapshot(){
+  if(TMR.phase==='focus'){
+    TMR.focusRemainingMs=currentRemainingSecs()*1000;
+  }
+}
 function offerBreak(){
   syncFocusSnapshot();
   clearInterval(TMR.iv);TMR.active=false;document.getElementById('tPlay').textContent='▶';document.getElementById('bSug').classList.add('show');
@@ -1244,6 +1249,7 @@ window.addEventListener('DOMContentLoaded',async()=>{
 </script>
 </body>
 </html>
+
 
 
 
