@@ -324,7 +324,7 @@ body.has-goal #tasks,body.has-goal #settings,body.has-goal #admin,body.has-goal 
 
 </div>
 <div id="timer" class="screen">
-  <button onclick="closeTimer()" title="Exit timer" style="position:absolute;top:52px;left:20px;background:rgba(255,255,255,.1);border:none;color:white;font-size:22px;font-weight:900;width:42px;height:42px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+  <button onclick="closeTimer()" title="Exit timer" style="position:fixed;top:52px;left:20px;z-index:95;background:rgba(255,255,255,.1);border:none;color:white;font-size:22px;font-weight:900;width:42px;height:42px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
   <div class="ttn" id="tName">Task Timer</div><div class="tph" id="tPhase">Focus Session</div>
   <div class="tcw"><svg class="tsvg" viewBox="0 0 252 252"><circle class="ttr" cx="126" cy="126" r="110"/><circle class="tpr" id="tProg" cx="126" cy="126" r="110" stroke-dasharray="691" stroke-dashoffset="0" stroke="#f5a96a"/></svg><div class="tce"><div class="tdi" id="tDisp">25:00</div><div class="tsu">minutes remaining</div></div></div>
   <div class="tct"><button class="tbtn sb" onclick="resetTimer()">↺</button><button class="tbtn pp" id="tPlay" onclick="toggleTimer()">▶</button><button class="tbtn sb" id="tSkip" onclick="skipBreak()" style="display:none;" title="Finish break early">⏭</button></div>
@@ -802,10 +802,12 @@ function closeTimer(){clearInterval(TMR.iv);TMR.active=false;endSection();showSc
 function toggleTimer(){
   if(TMR.active){
     TMR.pausedRemainingMs=Math.max(0,TMR.endTime-Date.now());
+    if(TMR.phase==='focus')TMR.focusRemainingMs=TMR.pausedRemainingMs;
     clearInterval(TMR.iv);TMR.active=false;
     document.getElementById('tPlay').textContent='▶';
     setNimbusActivity('idle',true);
   }else{
+    document.getElementById('bSug').classList.remove('show');
     TMR.endTime=Date.now()+TMR.pausedRemainingMs;
     TMR.active=true;
     document.getElementById('tPlay').textContent='⏸';
@@ -867,7 +869,6 @@ function skipBreak(){
   setNimbusActivity('idle',true);
 }
 function startBreak(min){
-  if(TMR.phase==='focus')TMR.focusRemainingMs=currentRemainingSecs()*1000;
   document.getElementById('bSug').classList.remove('show');
   TMR.phase='break';TMR.total=min*60;TMR.pausedRemainingMs=TMR.total*1000;TMR.endTime=Date.now()+TMR.pausedRemainingMs;
   document.getElementById('tPhase').textContent=`${min} min Break`;updTDispFromRem(TMR.total);
@@ -884,7 +885,7 @@ function resetTimer(){
   updTDispFromRem(TMR.focusTotal);
 }
 function offerBreak(){
-  if(TMR.phase==='focus')TMR.focusRemainingMs=currentRemainingSecs()*1000;
+  syncFocusSnapshot();
   clearInterval(TMR.iv);TMR.active=false;document.getElementById('tPlay').textContent='▶';document.getElementById('bSug').classList.add('show');
 }
 
@@ -1243,3 +1244,8 @@ window.addEventListener('DOMContentLoaded',async()=>{
 </script>
 </body>
 </html>
+
+
+
+
+
